@@ -23,6 +23,7 @@ export interface AnalysisResult {
   foods: FoodItem[];
   totalCalories: number;
   confidence?: string;
+  notes?: string; // 健康建议或补充说明
 }
 
 // 图片元数据
@@ -57,6 +58,8 @@ export interface AnalyzeResponse {
   data?: {
     foods: Array<{
       name: string;
+      portion?: string; // 份量信息
+      ingredients?: string; // 成分信息
       calories: number;
       nutrition: {
         protein: number;
@@ -67,6 +70,7 @@ export interface AnalyzeResponse {
     }>;
     totalCalories: number;
     confidence?: string;
+    notes?: string; // 健康建议
   };
   error?: {
     code: string;

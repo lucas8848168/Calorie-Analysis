@@ -1,118 +1,175 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AnalysisDisplayProps } from '../types';
 import { formatCalories, formatNutrition } from '../utils/dataParser';
+import EmptyState from './EmptyState';
 import './AnalysisDisplay.css';
 
 const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({
   result,
   onNewAnalysis,
 }) => {
+  const [animatedCalories, setAnimatedCalories] = useState(0);
+
+  // 数字滚动动画
+  useEffect(() => {
+    if (result && result.totalCalories > 0) {
+      let start = 0;
+      const end = Math.round(result.totalCalories * 10) / 10; // 保留1位小数
+      const duration = 1000;
+      const increment = end / (duration / 16);
+
+      const timer = setInterval(() => {
+        start += increment;
+        if (start >= end) {
+          setAnimatedCalories(end);
+          clearInterval(timer);
+        } else {
+          setAnimatedCalories(Math.floor(start));
+        }
+      }, 16);
+
+      return () => clearInterval(timer);
+    }
+  }, [result]);
+
   if (!result || result.foods.length === 0) {
-    // 根据置信度显示不同的提示
-    let message = '未检测到食物';
-    let hint = '请尝试上传包含食物的清晰图片';
+    let emptyType: 'no-food' | 'unclear' | 'not-food' = 'no-food';
     
     if (result?.confidence === 'unclear') {
-      message = '图片不够清晰';
-      hint = '请重新上传清晰的食物图片';
+      emptyType = 'unclear';
     } else if (result?.confidence === 'not_food') {
-      message = '这不是食物图片';
-      hint = '请上传包含食物的图片';
+      emptyType = 'not-food';
     }
     
-    return (
-      <div className="analysis-display empty">
-        <div className="empty-state">
-          <p>{message}</p>
-          <p className="hint">{hint}</p>
-          <button onClick={onNewAnalysis} className="btn-primary">
-            重新上传
-          </button>
-        </div>
-      </div>
-    );
+    return <EmptyState type={emptyType} onAction={onNewAnalysis} />;
   }
 
+  // 计算营养成分总和
+  const totalNutrition = result.foods.reduce(
+    (acc, food) => ({
+      protein: acc.protein + food.nutrition.protein,
+      fat: acc.fat + food.nutrition.fat,
+      carbs: acc.carbs + food.nutrition.carbs,
+      fiber: acc.fiber + food.nutrition.fiber,
+    }),
+    { protein: 0, fat: 0, carbs: 0, fiber: 0 }
+  );
+
+  // 计算每日推荐摄入百分比（假设 2000 kcal）
+  const dailyGoal = 2000;
+  const caloriePercentage = Math.min((result.totalCalories / dailyGoal) * 100, 100);
+
   return (
-    <div className="analysis-display">
-      <div className="result-header">
-        <h2>分析结果</h2>
-        {result.confidence && (
-          <span className={`confidence ${result.confidence}`}>
-            置信度: {result.confidence}
-          </span>
-        )}
-      </div>
-
-      <div className="total-calories">
-        <h3>总卡路里</h3>
-        <div className="calories-value">
-          {formatCalories(result.totalCalories)}
-        </div>
-        <p className="disclaimer">
-          * 基于标准份量的估算值，实际值可能有所不同
-        </p>
-      </div>
-
-      <div className="foods-list">
-        <h3>食物详情</h3>
-        {result.foods.map((food, index) => (
-          <div key={index} className="food-item">
-            <div className="food-header">
-              <h4>{food.name}</h4>
-              <span className="food-calories">
-                {formatCalories(food.calories)}
-              </span>
-            </div>
-            
-            {food.portion && (
-              <div className="food-meta">
-                <span className="meta-label">份量：</span>
-                <span className="meta-value">{food.portion}</span>
-              </div>
-            )}
-            
-            {food.ingredients && (
-              <div className="food-meta">
-                <span className="meta-label">成分：</span>
-                <span className="meta-value">{food.ingredients}</span>
-              </div>
-            )}
-            
-            <div className="nutrition-table">
-              <div className="nutrition-row">
-                <span className="nutrition-label">蛋白质</span>
-                <span className="nutrition-value">
-                  {formatNutrition(food.nutrition.protein)}
-                </span>
-              </div>
-              <div className="nutrition-row">
-                <span className="nutrition-label">脂肪</span>
-                <span className="nutrition-value">
-                  {formatNutrition(food.nutrition.fat)}
-                </span>
-              </div>
-              <div className="nutrition-row">
-                <span className="nutrition-label">碳水化合物</span>
-                <span className="nutrition-value">
-                  {formatNutrition(food.nutrition.carbs)}
-                </span>
-              </div>
-              <div className="nutrition-row">
-                <span className="nutrition-label">膳食纤维</span>
-                <span className="nutrition-value">
-                  {formatNutrition(food.nutrition.fiber)}
-                </span>
-              </div>
+    <div className="analysis-display-v2 animate-fadeIn">
+      {/* 总卡路里卡片 */}
+      <div className="calories-card-compact card">
+        <div className="calories-main">
+          <div className="calories-info">
+            <h2 className="calories-title-compact">总卡路里</h2>
+            <div className="calories-number-compact">
+              {animatedCalories === Math.floor(animatedCalories) 
+                ? animatedCalories 
+                : animatedCalories.toFixed(1)}
+              <span className="calories-unit-compact">kcal</span>
             </div>
           </div>
-        ))}
+          <div className="calories-progress-compact">
+            <div className="progress-compact">
+              <div
+                className="progress-bar-compact"
+                style={{ width: `${caloriePercentage}%` }}
+              ></div>
+            </div>
+            <div className="progress-text-compact">
+              已摄入 {Math.round(caloriePercentage)}% / 每日推荐 {dailyGoal} kcal
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="actions">
-        <button onClick={onNewAnalysis} className="btn-primary">
-          上传新图片
+      {/* 营养成分速览 */}
+      <div className="nutrition-overview card">
+        <h3 className="section-title">营养成分速览</h3>
+        
+        {/* 食物列表 */}
+        <div className="foods-list-simple">
+          {result.foods.map((food, index) => (
+            <div key={index} className="food-item-simple">
+              <span className="food-item-name">{food.name}</span>
+              {food.portion && <span className="food-item-portion">{food.portion}</span>}
+              <div className="food-item-calories">{formatCalories(food.calories)}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="nutrition-grid">
+          <div className="nutrition-item">
+            <div className="nutrition-icon">🥩</div>
+            <div className="nutrition-info">
+              <div className="nutrition-label">蛋白质</div>
+              <div className="nutrition-value">{formatNutrition(totalNutrition.protein)}</div>
+            </div>
+            <div className="nutrition-bar">
+              <div className="bar" style={{ width: `${Math.min((totalNutrition.protein / 50) * 100, 100)}%`, background: 'var(--gradient-success)' }}></div>
+            </div>
+          </div>
+
+          <div className="nutrition-item">
+            <div className="nutrition-icon">🥑</div>
+            <div className="nutrition-info">
+              <div className="nutrition-label">脂肪</div>
+              <div className="nutrition-value">{formatNutrition(totalNutrition.fat)}</div>
+            </div>
+            <div className="nutrition-bar">
+              <div className="bar" style={{ width: `${Math.min((totalNutrition.fat / 65) * 100, 100)}%`, background: 'var(--gradient-warning)' }}></div>
+            </div>
+          </div>
+
+          <div className="nutrition-item">
+            <div className="nutrition-icon">🍚</div>
+            <div className="nutrition-info">
+              <div className="nutrition-label">碳水</div>
+              <div className="nutrition-value">{formatNutrition(totalNutrition.carbs)}</div>
+            </div>
+            <div className="nutrition-bar">
+              <div className="bar" style={{ width: `${Math.min((totalNutrition.carbs / 275) * 100, 100)}%`, background: 'var(--gradient-info)' }}></div>
+            </div>
+          </div>
+
+          <div className="nutrition-item">
+            <div className="nutrition-icon">🌾</div>
+            <div className="nutrition-info">
+              <div className="nutrition-label">纤维</div>
+              <div className="nutrition-value">{formatNutrition(totalNutrition.fiber)}</div>
+            </div>
+            <div className="nutrition-bar">
+              <div className="bar" style={{ width: `${Math.min((totalNutrition.fiber / 25) * 100, 100)}%`, background: 'var(--gradient-primary)' }}></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 健康建议 */}
+      {result.notes && (
+        <div className="health-advice card">
+          <div className="advice-icon">💡</div>
+          <div className="advice-content">
+            <h4 className="advice-title">健康建议</h4>
+            <p className="advice-text">{result.notes}</p>
+          </div>
+        </div>
+      )}
+
+      {/* 操作按钮 */}
+      <div className="actions-section">
+        <button onClick={onNewAnalysis} className="btn btn-primary btn-lg">
+          📸 上传新图片
         </button>
+      </div>
+
+      {/* 免责声明 */}
+      <div className="disclaimer">
+        <p>* 营养数据基于标准份量估算，实际值可能因食材、烹饪方式等因素有所不同</p>
       </div>
     </div>
   );

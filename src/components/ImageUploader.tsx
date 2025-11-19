@@ -138,6 +138,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             </svg>
             <p>点击或拖拽上传食物图片</p>
             <p className="formats">支持 JPEG、PNG、WebP 格式，最大 10MB</p>
+            <p className="formats" style={{ marginTop: '0.5rem', color: '#ff9800', fontSize: '0.85rem' }}>
+              ⚠️ 建议拍摄单次用餐的食物，避免拍摄整个餐桌或食材展示图
+            </p>
           </div>
         )}
       </div>

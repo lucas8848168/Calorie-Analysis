@@ -8,7 +8,7 @@ export function parseAnalysisResponse(response: AnalyzeResponse): AnalysisResult
     return null;
   }
 
-  const { foods, totalCalories, confidence } = response.data;
+  const { foods, totalCalories, confidence, notes } = response.data;
 
   // 验证数据完整性
   if (!Array.isArray(foods)) {
@@ -39,6 +39,8 @@ export function parseAnalysisResponse(response: AnalyzeResponse): AnalysisResult
 
     return {
       name: food.name,
+      portion: food.portion, // 保留份量信息
+      ingredients: food.ingredients, // 保留成分信息
       calories: food.calories,
       nutrition: {
         protein,
@@ -57,6 +59,7 @@ export function parseAnalysisResponse(response: AnalyzeResponse): AnalysisResult
     foods: parsedFoods,
     totalCalories: totalCalories || calculateTotalCalories(parsedFoods),
     confidence,
+    notes, // 保留健康建议
   };
 
   return result;

@@ -95,6 +95,7 @@ async function handleAnalyze(request: Request, config: any): Promise<Response> {
         foods: result.foods,
         totalCalories,
         confidence: result.confidence,
+        notes: result.notes,
       },
     });
   } catch (error: any) {

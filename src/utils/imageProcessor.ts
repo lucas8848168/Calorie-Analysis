@@ -3,8 +3,13 @@ import { ImageMetadata, ProcessedImage } from '../types';
 // 支持的图片格式
 const SUPPORTED_FORMATS = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_DIMENSION = 2048; // 优化为2048px以提升识别准确度
-const MAX_COMPRESSED_SIZE = 1 * 1024 * 1024; // 1MB
+
+// 优化的压缩参数：平衡识别率、速度和 token 消耗
+const TARGET_MAX_DIMENSION = 1440; // 目标最长边 1280-1600px 的中间值
+const TARGET_MIN_SIZE = 200 * 1024; // 200KB
+const TARGET_MAX_SIZE = 600 * 1024; // 600KB
+const QUALITY_HIGH = 0.75; // 高质量
+const QUALITY_LOW = 0.65; // 低质量
 
 /**
  * 验证文件格式
@@ -76,24 +81,39 @@ export async function extractImageMetadata(file: File): Promise<ImageMetadata> {
 }
 
 /**
- * 压缩图片
+ * 压缩图片（优化版：平衡识别率、速度和 token 消耗）
  */
 export async function compressImage(
-  file: File,
-  maxDimension: number = MAX_DIMENSION,
-  maxSize: number = MAX_COMPRESSED_SIZE
+  file: File
 ): Promise<ProcessedImage> {
   
   // 加载图片并修正EXIF方向
   const img = await loadImage(file);
   const orientedCanvas = await fixImageOrientation(img, file);
   
-  // 计算新尺寸
+  // 计算目标尺寸（1280-1600px）
   let newWidth = orientedCanvas.width;
   let newHeight = orientedCanvas.height;
+  const maxDimension = Math.max(newWidth, newHeight);
   
-  if (newWidth > maxDimension || newHeight > maxDimension) {
-    const ratio = Math.min(maxDimension / newWidth, maxDimension / newHeight);
+  // 智能缩放：根据原始尺寸选择目标尺寸
+  let targetDimension = TARGET_MAX_DIMENSION;
+  if (maxDimension < 1280) {
+    // 小图片不放大，保持原尺寸
+    targetDimension = maxDimension;
+  } else if (maxDimension < 2000) {
+    // 中等图片压缩到 1280px
+    targetDimension = 1280;
+  } else if (maxDimension < 3000) {
+    // 大图片压缩到 1440px
+    targetDimension = 1440;
+  } else {
+    // 超大图片压缩到 1600px
+    targetDimension = 1600;
+  }
+  
+  if (maxDimension > targetDimension) {
+    const ratio = targetDimension / maxDimension;
     newWidth = Math.floor(newWidth * ratio);
     newHeight = Math.floor(newHeight * ratio);
   }
@@ -108,26 +128,50 @@ export async function compressImage(
     throw new Error('COMPRESSION_FAILED');
   }
   
-  // 绘制修正方向后的图片
+  // 绘制修正方向后的图片（使用高质量插值）
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(orientedCanvas, 0, 0, newWidth, newHeight);
   
-  // 渐进式压缩直到满足大小要求
-  let quality = 0.92;
+  // 智能质量控制：目标 200KB-600KB
+  let quality = QUALITY_HIGH; // 从 0.75 开始
   let dataUrl = canvas.toDataURL('image/jpeg', quality);
+  let estimatedSize = Math.floor(dataUrl.length * 0.75);
   
-  // 动态调整压缩质量
-  while (dataUrl.length > maxSize * 1.37 && quality > 0.5) {
-    quality -= 0.08;
-    dataUrl = canvas.toDataURL('image/jpeg', quality);
+  // 如果文件太大，降低质量
+  if (estimatedSize > TARGET_MAX_SIZE) {
+    // 二分查找最佳质量
+    let minQuality = QUALITY_LOW;
+    let maxQuality = QUALITY_HIGH;
+    let attempts = 0;
+    
+    while (attempts < 5 && Math.abs(estimatedSize - TARGET_MAX_SIZE) > 50 * 1024) {
+      quality = (minQuality + maxQuality) / 2;
+      dataUrl = canvas.toDataURL('image/jpeg', quality);
+      estimatedSize = Math.floor(dataUrl.length * 0.75);
+      
+      if (estimatedSize > TARGET_MAX_SIZE) {
+        maxQuality = quality;
+      } else {
+        minQuality = quality;
+      }
+      attempts++;
+    }
   }
   
-  // 计算压缩后的大小（Base64字符串长度约为实际字节数的1.37倍）
-  const compressedSize = Math.floor(dataUrl.length * 0.75);
+  // 如果文件太小且质量还有提升空间，可以略微提高质量
+  if (estimatedSize < TARGET_MIN_SIZE && quality < QUALITY_HIGH) {
+    quality = Math.min(quality + 0.05, QUALITY_HIGH);
+    dataUrl = canvas.toDataURL('image/jpeg', quality);
+    estimatedSize = Math.floor(dataUrl.length * 0.75);
+  }
+  
+  console.log(`Image compressed: ${newWidth}x${newHeight}, quality: ${quality.toFixed(2)}, size: ${(estimatedSize / 1024).toFixed(0)}KB`);
   
   return {
     dataUrl,
     originalSize: file.size,
-    compressedSize,
+    compressedSize: estimatedSize,
     dimensions: { width: newWidth, height: newHeight },
     format: 'jpeg',
   };
@@ -262,34 +306,39 @@ export async function processImage(file: File): Promise<ProcessedImage> {
   const metadata = await extractImageMetadata(file);
   
   // 判断是否需要压缩
+  const maxDim = Math.max(metadata.dimensions.width, metadata.dimensions.height);
   const needsCompression =
-    metadata.dimensions.width > MAX_DIMENSION ||
-    metadata.dimensions.height > MAX_DIMENSION ||
-    file.size > MAX_COMPRESSED_SIZE;
+    maxDim > 1280 || // 超过 1280px 需要压缩
+    file.size > TARGET_MAX_SIZE; // 超过 600KB 需要压缩
   
   if (needsCompression) {
     return await compressImage(file);
   }
   
-  // 不需要压缩，直接转换为DataURL
-  const dataUrl = await fileToDataUrl(file);
+  // 小图片也需要转换为 JPEG 格式以统一处理
+  const img = await loadImage(file);
+  const orientedCanvas = await fixImageOrientation(img, file);
+  
+  const canvas = document.createElement('canvas');
+  canvas.width = orientedCanvas.width;
+  canvas.height = orientedCanvas.height;
+  const ctx = canvas.getContext('2d');
+  
+  if (!ctx) {
+    throw new Error('COMPRESSION_FAILED');
+  }
+  
+  ctx.drawImage(orientedCanvas, 0, 0);
+  const dataUrl = canvas.toDataURL('image/jpeg', QUALITY_HIGH);
+  const compressedSize = Math.floor(dataUrl.length * 0.75);
+  
   return {
     dataUrl,
     originalSize: file.size,
-    compressedSize: file.size,
+    compressedSize,
     dimensions: metadata.dimensions,
-    format: metadata.format,
+    format: 'jpeg',
   };
 }
 
-/**
- * 将File转换为DataURL
- */
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(new Error('IMAGE_DECODE_ERROR'));
-    reader.readAsDataURL(file);
-  });
-}
+

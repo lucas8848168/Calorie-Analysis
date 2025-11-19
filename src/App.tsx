@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import ImageUploader from './components/ImageUploader';
 import LoadingIndicator from './components/LoadingIndicator';
 import AnalysisDisplay from './components/AnalysisDisplay';
@@ -16,15 +16,23 @@ function App() {
   const [, setCurrentImage] = useState<ProcessedImage | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const analysisInProgressRef = useRef<boolean>(false);
 
   const handleImageProcessed = async (image: ProcessedImage) => {
     setCurrentImage(image);
     setError(null);
     setState('analyzing');
+    analysisInProgressRef.current = true;
 
     try {
       // 调用API分析图片
       const response = await analyzeFood(image.dataUrl, image.format);
+
+      // 检查分析是否被中断（用户切换到其他页面）
+      if (!analysisInProgressRef.current) {
+        console.log('分析已被中断，不更新状态');
+        return;
+      }
 
       // 解析响应
       const result = parseAnalysisResponse(response);
@@ -34,12 +42,14 @@ function App() {
         if (response.data?.confidence === 'unclear') {
           setError('图片不够清晰，无法准确识别食物。请重新上传清晰的图片。');
           setState('upload');
+          analysisInProgressRef.current = false;
           return;
         }
         
         if (response.data?.confidence === 'not_food') {
           setError('这张图片不是食物图片。请上传包含食物的图片。');
           setState('upload');
+          analysisInProgressRef.current = false;
           return;
         }
 
@@ -56,8 +66,13 @@ function App() {
         throw new Error('解析响应失败');
       }
     } catch (err: any) {
-      setError(err.message || '分析失败，请稍后重试');
-      setState('upload');
+      // 只有在分析未被中断时才显示错误
+      if (analysisInProgressRef.current) {
+        setError(err.message || '分析失败，请稍后重试');
+        setState('upload');
+      }
+    } finally {
+      analysisInProgressRef.current = false;
     }
   };
 
@@ -73,6 +88,10 @@ function App() {
   };
 
   const handleShowHistory = () => {
+    // 如果正在分析，标记为中断
+    if (analysisInProgressRef.current) {
+      analysisInProgressRef.current = false;
+    }
     setState('history');
   };
 
@@ -82,6 +101,10 @@ function App() {
   };
 
   const handleBackToUpload = () => {
+    // 如果正在分析，标记为中断
+    if (analysisInProgressRef.current) {
+      analysisInProgressRef.current = false;
+    }
     setState('upload');
   };
 
@@ -96,12 +119,14 @@ function App() {
         <button
           className={state === 'upload' || state === 'analyzing' || state === 'result' ? 'active' : ''}
           onClick={handleBackToUpload}
+          disabled={analysisInProgressRef.current}
         >
           分析
         </button>
         <button
           className={state === 'history' ? 'active' : ''}
           onClick={handleShowHistory}
+          disabled={analysisInProgressRef.current}
         >
           历史记录
         </button>
@@ -123,7 +148,15 @@ function App() {
         )}
 
         {state === 'analyzing' && (
-          <LoadingIndicator message="正在分析食物，请稍候..." />
+          <div>
+            <LoadingIndicator message="正在分析食物，请稍候..." />
+            <p className="loading-hint">
+              💡 提示：豆包 AI 分析通常需要 30-60 秒，复杂图片可能需要 1-2 分钟
+            </p>
+            <p className="loading-hint" style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#999' }}>
+              如果图片包含多种食物（&gt;10种），AI 将只识别主要食物以加快速度
+            </p>
+          </div>
         )}
 
         {state === 'result' && analysisResult && (

@@ -1,8 +1,8 @@
 import { AnalyzeRequest, AnalyzeResponse } from '../types';
 
 const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || 'http://localhost:8787';
-const REQUEST_TIMEOUT = 30000; // 30秒
-const FALLBACK_TIMEOUT = 45000; // 降级策略超时45秒
+const REQUEST_TIMEOUT = 60000; // 60秒（豆包 API 通常需要 30-60 秒）
+const FALLBACK_TIMEOUT = 120000; // 降级策略超时120秒（复杂图片需要更长时间）
 
 /**
  * 分析食物图片（带超时和降级策略）
@@ -22,7 +22,7 @@ export async function analyzeFood(
         return await analyzeFoodWithTimeout(imageDataUrl, format, FALLBACK_TIMEOUT);
       } catch (fallbackError: any) {
         // 降级也失败，返回友好提示
-        throw new Error('REQUEST_TIMEOUT: 图片分析时间较长，请尝试上传更清晰或更小的图片');
+        throw new Error('REQUEST_TIMEOUT: 分析超时（已尝试120秒）。这张图片可能包含太多种类的食物。建议：1) 只拍摄单次用餐的食物 2) 避免拍摄整个餐桌或食材展示图 3) 如需分析多种食物，请分批上传');
       }
     }
     throw error;
