@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import GoalSetup from '../components/Goal/GoalSetup';
 import GoalProgress from '../components/Goal/GoalProgress';
 import GoalCard from '../components/Goal/GoalCard';
@@ -12,6 +12,7 @@ type ViewMode = 'overview' | 'create' | 'reminders';
 /**
  * 目标管理页面
  * 集成目标设置、进度追踪、目标卡片和提醒设置
+ * 使用性能优化
  */
 const GoalManagement: React.FC = () => {
   const [activeGoal, setActiveGoal] = useState<UserGoal | null>(null);
@@ -19,8 +20,8 @@ const GoalManagement: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('overview');
   const [isLoading, setIsLoading] = useState(true);
 
-  // 加载目标数据
-  const loadGoals = () => {
+  // 加载目标数据（使用useCallback优化）
+  const loadGoals = useCallback(() => {
     setIsLoading(true);
     try {
       const active = getActiveGoal();
@@ -32,28 +33,33 @@ const GoalManagement: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadGoals();
-  }, []);
+  }, [loadGoals]);
 
-  // 处理目标创建成功
-  const handleGoalCreated = () => {
+  // 处理目标创建成功（使用useCallback优化）
+  const handleGoalCreated = useCallback(() => {
     loadGoals();
     setViewMode('overview');
-  };
+  }, [loadGoals]);
 
-  // 处理目标状态变化
-  const handleGoalStatusChange = () => {
+  // 处理目标状态变化（使用useCallback优化）
+  const handleGoalStatusChange = useCallback(() => {
     loadGoals();
-  };
+  }, [loadGoals]);
 
-  // 处理编辑目标
-  const handleEditGoal = () => {
+  // 处理编辑目标（使用useCallback优化）
+  const handleEditGoal = useCallback(() => {
     // TODO: 实现编辑功能
     alert('编辑功能即将推出');
-  };
+  }, []);
+
+  // 计算历史目标（使用useMemo优化）
+  const historyGoals = useMemo(() => {
+    return allGoals.filter((g) => g.status !== 'active');
+  }, [allGoals]);
 
   // 渲染空状态
   const renderEmptyState = () => (
@@ -96,22 +102,20 @@ const GoalManagement: React.FC = () => {
         </section>
 
         {/* 历史目标 */}
-        {allGoals.filter((g) => g.status !== 'active').length > 0 && (
+        {historyGoals.length > 0 && (
           <section className="history-section">
             <div className="section-header">
               <h2>历史目标</h2>
             </div>
             <div className="goals-grid">
-              {allGoals
-                .filter((g) => g.status !== 'active')
-                .map((goal) => (
-                  <GoalCard
-                    key={goal.id}
-                    goal={goal}
-                    onEdit={handleEditGoal}
-                    onStatusChange={handleGoalStatusChange}
-                  />
-                ))}
+              {historyGoals.map((goal) => (
+                <GoalCard
+                  key={goal.id}
+                  goal={goal}
+                  onEdit={handleEditGoal}
+                  onStatusChange={handleGoalStatusChange}
+                />
+              ))}
             </div>
           </section>
         )}

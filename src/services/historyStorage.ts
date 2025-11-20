@@ -1,4 +1,5 @@
 import { AnalysisResult, HistoryStorage } from '../types';
+import { autoCleanup, hasEnoughSpace } from '../utils/storageOptimizer';
 
 const STORAGE_KEY = 'food_analyzer_history';
 const MAX_RECORDS = 50;
@@ -7,6 +8,7 @@ const MAX_AGE_DAYS = 30;
 class HistoryStorageService implements HistoryStorage {
   /**
    * 保存分析记录
+   * 包含自动清理和空间检查
    */
   saveRecord(record: AnalysisResult): void {
     try {
@@ -20,6 +22,18 @@ class HistoryStorageService implements HistoryStorage {
       
       // 清理过期记录
       const cleanedRecords = this.cleanOldRecords(limitedRecords);
+      
+      // 检查空间
+      const dataSize = JSON.stringify(cleanedRecords).length;
+      if (!hasEnoughSpace(dataSize)) {
+        // 尝试自动清理
+        autoCleanup();
+        
+        // 再次检查
+        if (!hasEnoughSpace(dataSize)) {
+          throw new Error('STORAGE_FULL');
+        }
+      }
       
       // 保存到LocalStorage
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedRecords));

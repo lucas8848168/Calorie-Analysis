@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {
   ComposedChart,
   Line,
@@ -16,9 +16,9 @@ import { formatDateForChart } from '../../services/chartDataService';
 import './CalorieTrendChart.css';
 
 /**
- * 自定义Tooltip组件
+ * 自定义Tooltip组件（使用memo优化）
  */
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = memo(({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
@@ -37,7 +37,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     );
   }
   return null;
-};
+});
 
 /**
  * 卡路里趋势图组件
@@ -205,4 +205,4 @@ const CalorieTrendChart: React.FC<CalorieTrendChartProps> = ({
   );
 };
 
-export default CalorieTrendChart;
+export default memo(CalorieTrendChart);

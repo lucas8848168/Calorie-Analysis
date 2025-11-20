@@ -1,4 +1,5 @@
 import { MealRecord, MealType, FoodItem, NutritionInfo } from '../types';
+import { autoCleanup, hasEnoughSpace } from '../utils/storageOptimizer';
 
 const STORAGE_KEY = 'meals';
 
@@ -41,12 +42,29 @@ function getMealsFromStorage(): MealRecord[] {
 
 /**
  * 保存餐次记录到 LocalStorage
+ * 包含自动清理功能
  */
 function saveMealsToStorage(meals: MealRecord[]): void {
   try {
+    const dataSize = JSON.stringify(meals).length;
+
+    // 检查空间是否足够
+    if (!hasEnoughSpace(dataSize)) {
+      // 尝试自动清理
+      autoCleanup();
+
+      // 再次检查
+      if (!hasEnoughSpace(dataSize)) {
+        throw new Error('STORAGE_FULL: 存储空间已满，请清理旧数据');
+      }
+    }
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(meals));
   } catch (error) {
     console.error('Failed to save meals to storage:', error);
+    if (error instanceof Error && error.message.includes('STORAGE_FULL')) {
+      throw error;
+    }
     throw new Error('STORAGE_FULL: 存储空间已满，请清理旧数据');
   }
 }

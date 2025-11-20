@@ -1,129 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   CalorieTrendChart,
   NutritionRadarChart,
   MealDistributionChart,
   TimePeriodSelector,
-  TimePeriod,
 } from '../components/Charts';
-import {
-  getWeekViewData,
-  getMonthViewData,
-  getDayViewData,
-  getDataSummary,
-  calculateAverageNutrition,
-} from '../services/chartDataService';
-import { getMealsByDateRange } from '../services/mealService';
-import { ChartDataPoint, MacroNutrition, MealType } from '../types';
+import { useChartData } from '../hooks';
+import { MealType, MacroNutrition } from '../types';
 import './DataAnalysis.css';
 
 /**
  * 数据分析页面
  * 集成所有图表组件，提供完整的数据可视化和分析功能
+ * 使用自定义hooks和性能优化
  */
 const DataAnalysis: React.FC = () => {
-  const [timePeriod, setTimePeriod] = useState<TimePeriod>('week');
-  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // 使用自定义hook管理图表数据
+  const {
+    timePeriod,
+    chartData,
+    summary,
+    actualNutrition,
+    allMeals,
+    isLoading,
+    changePeriod,
+  } = useChartData('week');
 
-  // 默认目标值
-  const defaultGoal = {
-    dailyCalories: 2000,
-    nutrition: {
-      protein: 50,
-      fat: 65,
-      carbs: 275,
-      fiber: 25,
-    },
-  };
+  // 默认目标值（使用useMemo缓存）
+  const defaultGoal = useMemo(
+    () => ({
+      dailyCalories: 2000,
+      nutrition: {
+        protein: 50,
+        fat: 65,
+        carbs: 275,
+        fiber: 25,
+      },
+    }),
+    []
+  );
 
-  // 加载数据
-  useEffect(() => {
-    loadData();
-  }, [timePeriod]);
-
-  const loadData = () => {
-    setIsLoading(true);
-
-    try {
-      let data: ChartDataPoint[];
-
-      switch (timePeriod) {
-        case 'day':
-          data = getDayViewData(new Date());
-          break;
-        case 'week':
-          data = getWeekViewData();
-          break;
-        case 'month':
-          data = getMonthViewData();
-          break;
-        default:
-          data = getWeekViewData();
-      }
-
-      setChartData(data);
-    } catch (error) {
-      console.error('Failed to load chart data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 计算数据摘要
-  const getSummary = () => {
-    if (chartData.length === 0) {
-      return {
-        totalDays: 0,
-        totalMeals: 0,
-        totalCalories: 0,
-        averageDailyCalories: 0,
-        averageNutrition: { protein: 0, fat: 0, carbs: 0, fiber: 0 },
-        mealDistribution: {
-          [MealType.BREAKFAST]: 0,
-          [MealType.LUNCH]: 0,
-          [MealType.DINNER]: 0,
-          [MealType.SNACK]: 0,
-        },
-      };
-    }
-
-    const startDate = chartData[0].date;
-    const endDate = chartData[chartData.length - 1].date;
-    return getDataSummary(startDate, endDate);
-  };
-
-  // 获取实际营养摄入
-  const getActualNutrition = (): MacroNutrition => {
-    if (chartData.length === 0) {
-      return { protein: 0, fat: 0, carbs: 0, fiber: 0 };
-    }
-
-    const startDate = chartData[0].date;
-    const endDate = chartData[chartData.length - 1].date;
-    const meals = getMealsByDateRange(startDate, endDate);
-
-    return calculateAverageNutrition(meals, chartData.length);
-  };
-
-  // 获取所有餐次
-  const getAllMeals = () => {
-    if (chartData.length === 0) return [];
-
-    const startDate = chartData[0].date;
-    const endDate = chartData[chartData.length - 1].date;
-    return getMealsByDateRange(startDate, endDate);
-  };
-
-  // 处理餐次点击
-  const handleMealTypeClick = (mealType: MealType) => {
+  // 处理餐次点击（使用useCallback优化）
+  const handleMealTypeClick = useCallback((mealType: MealType) => {
     console.log('Clicked meal type:', mealType);
     // 可以在这里导航到餐次详情或筛选数据
-  };
-
-  const summary = getSummary();
-  const actualNutrition = getActualNutrition();
-  const allMeals = getAllMeals();
+  }, []);
 
   return (
     <div className="data-analysis-page">
@@ -137,7 +58,7 @@ const DataAnalysis: React.FC = () => {
 
       {/* 时间维度选择器 */}
       <div className="time-selector-section">
-        <TimePeriodSelector selectedPeriod={timePeriod} onPeriodChange={setTimePeriod} />
+        <TimePeriodSelector selectedPeriod={timePeriod} onPeriodChange={changePeriod} />
       </div>
 
       {isLoading ? (
