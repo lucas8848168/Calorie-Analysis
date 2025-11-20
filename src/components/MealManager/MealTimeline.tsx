@@ -171,7 +171,6 @@ const MealTimeline: React.FC<MealTimelineProps> = ({
                       meal={meal}
                       isExpanded={expandedMeals.has(meal.id)}
                       onToggleExpand={() => toggleMealExpand(meal.id)}
-                      onUpdate={loadMeals}
                       onDelete={loadMeals}
                     />
                   ))}

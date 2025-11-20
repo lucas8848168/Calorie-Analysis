@@ -7,7 +7,7 @@ import { UserGoal, GoalType } from '../../types';
  * 展示不同类型和状态的目标卡片
  */
 const GoalCardExample: React.FC = () => {
-  const [goals, setGoals] = useState<UserGoal[]>([
+  const [goals] = useState<UserGoal[]>([
     {
       id: 'goal_1',
       userId: 'user_1',

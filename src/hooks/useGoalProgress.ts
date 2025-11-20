@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { UserGoal, NutritionInfo } from '../types';
+import { UserGoal } from '../types';
 import {
   getActiveGoal,
   calculateProgress,
@@ -44,28 +44,8 @@ export function useGoalProgress() {
     const todayEnd = new Date(todayStart);
     todayEnd.setDate(todayEnd.getDate() + 1);
 
-    // 获取今天的餐次
-    const todayMeals = getMealsByDateRange(todayStart, todayEnd);
-    const todayCalories = todayMeals.reduce((sum, meal) => {
-      return sum + meal.foods.reduce((mealSum, food) => mealSum + food.calories, 0);
-    }, 0);
-
-    // 计算今天的营养摄入
-    const todayNutrition: NutritionInfo = todayMeals.reduce(
-      (total, meal) => {
-        meal.foods.forEach((food) => {
-          total.protein += food.nutrition.protein;
-          total.fat += food.nutrition.fat;
-          total.carbs += food.nutrition.carbs;
-          total.fiber += food.nutrition.fiber;
-        });
-        return total;
-      },
-      { protein: 0, fat: 0, carbs: 0, fiber: 0 }
-    );
-
     // 检查今天是否达标
-    const achievement = checkDailyGoalAchievement(goal, todayCalories, todayNutrition);
+    const achievement = checkDailyGoalAchievement(goal, today);
     const todayAchieved = achievement.overallAchieved;
 
     // 计算连续达标天数（简化版本）
@@ -79,25 +59,7 @@ export function useGoalProgress() {
       const dayEnd = new Date(checkDate);
       dayEnd.setHours(23, 59, 59, 999);
 
-      const dayMeals = getMealsByDateRange(dayStart, dayEnd);
-      const dayCalories = dayMeals.reduce((sum, meal) => {
-        return sum + meal.foods.reduce((mealSum, food) => mealSum + food.calories, 0);
-      }, 0);
-
-      const dayNutrition: NutritionInfo = dayMeals.reduce(
-        (total, meal) => {
-          meal.foods.forEach((food) => {
-            total.protein += food.nutrition.protein;
-            total.fat += food.nutrition.fat;
-            total.carbs += food.nutrition.carbs;
-            total.fiber += food.nutrition.fiber;
-          });
-          return total;
-        },
-        { protein: 0, fat: 0, carbs: 0, fiber: 0 }
-      );
-
-      const dayAchievement = checkDailyGoalAchievement(goal, dayCalories, dayNutrition);
+      const dayAchievement = checkDailyGoalAchievement(goal, checkDate);
       if (dayAchievement.overallAchieved) {
         consecutiveDays++;
         checkDate.setDate(checkDate.getDate() - 1);

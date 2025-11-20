@@ -3,7 +3,7 @@
  * This demonstrates how to integrate the component into your application
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import TemplateManager from './TemplateManager';
 import { FoodItem, MealType } from '../../types';
 import { saveMeal } from '../../services/mealService';

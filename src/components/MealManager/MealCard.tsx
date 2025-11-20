@@ -7,7 +7,6 @@ interface MealCardProps {
   meal: MealRecord;
   isExpanded: boolean;
   onToggleExpand: () => void;
-  onUpdate: () => void;
   onDelete: () => void;
 }
 
@@ -15,7 +14,6 @@ const MealCard: React.FC<MealCardProps> = ({
   meal,
   isExpanded,
   onToggleExpand,
-  onUpdate,
   onDelete,
 }) => {
   const handleDelete = () => {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MealRecord } from '../types';
+import { MealRecord, MealType } from '../types';
 import {
   getMealsByDateRange,
   getMealsByType,
@@ -56,7 +56,7 @@ export function useMealRecords(options: UseMealRecordsOptions = {}) {
 
   // 按餐次类型过滤
   const getMealsByMealType = useCallback(
-    (mealType: string) => {
+    (mealType: MealType) => {
       return getMealsByType(mealType);
     },
     []

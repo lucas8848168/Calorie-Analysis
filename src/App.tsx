@@ -12,11 +12,9 @@ import { historyStorage } from './services/historyStorage';
 import './App.css';
 
 type AppPage = 'analysis' | 'analyzing' | 'result' | 'history' | 'data' | 'goals';
-type AnalysisState = 'upload' | 'analyzing' | 'result';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<AppPage>('analysis');
-  const [analysisState, setAnalysisState] = useState<AnalysisState>('upload');
   const [, setCurrentImage] = useState<ProcessedImage | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +23,6 @@ function App() {
   const handleImageProcessed = async (image: ProcessedImage) => {
     setCurrentImage(image);
     setError(null);
-    setAnalysisState('analyzing');
     setCurrentPage('analyzing');
     analysisInProgressRef.current = true;
 
@@ -46,7 +43,6 @@ function App() {
         // 检查特殊情况
         if (response.data?.confidence === 'unclear') {
           setError('图片不够清晰，无法准确识别食物。请重新上传清晰的图片。');
-          setAnalysisState('upload');
           setCurrentPage('analysis');
           analysisInProgressRef.current = false;
           return;
@@ -54,7 +50,6 @@ function App() {
         
         if (response.data?.confidence === 'not_food') {
           setError('这张图片不是食物图片。请上传包含食物的图片。');
-          setAnalysisState('upload');
           setCurrentPage('analysis');
           analysisInProgressRef.current = false;
           return;
@@ -68,7 +63,6 @@ function App() {
 
         // 显示结果
         setAnalysisResult(result);
-        setAnalysisState('result');
         setCurrentPage('result');
       } else {
         throw new Error('解析响应失败');
@@ -77,7 +71,6 @@ function App() {
       // 只有在分析未被中断时才显示错误
       if (analysisInProgressRef.current) {
         setError(err.message || '分析失败，请稍后重试');
-        setAnalysisState('upload');
         setCurrentPage('analysis');
       }
     } finally {
@@ -93,13 +86,11 @@ function App() {
     setCurrentImage(null);
     setAnalysisResult(null);
     setError(null);
-    setAnalysisState('upload');
     setCurrentPage('analysis');
   };
 
   const handleSelectRecord = (record: AnalysisResult) => {
     setAnalysisResult(record);
-    setAnalysisState('result');
     setCurrentPage('result');
   };
 

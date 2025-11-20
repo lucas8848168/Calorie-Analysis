@@ -21,7 +21,6 @@ const STEPS = [
 ];
 
 const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
-  message = '正在分析中...',
   progress,
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
