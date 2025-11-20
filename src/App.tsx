@@ -206,7 +206,7 @@ function App() {
       </nav>
 
       <footer className="app-footer">
-        <p>由方舟豆包 1.6 大模型提供支持 | 数据仅供参考</p>
+        <p>© 2025 Zhang Qun | 由方舟豆包 1.6 大模型提供支持 | 数据仅供参考</p>
       </footer>
     </div>
   );

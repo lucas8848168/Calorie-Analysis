@@ -1,5 +1,6 @@
-import { MealRecord, MealType, FoodItem, NutritionInfo } from '../types';
+import { MealRecord, MealType, FoodItem, NutritionInfo, AnalysisResult } from '../types';
 import { autoCleanup, hasEnoughSpace } from '../utils/storageOptimizer';
+import { historyStorage } from './historyStorage';
 
 const STORAGE_KEY = 'meals';
 
@@ -19,21 +20,67 @@ function calculateTotalNutrition(foods: FoodItem[]): NutritionInfo {
 }
 
 /**
+ * 将 AnalysisResult 转换为 MealRecord
+ */
+function convertAnalysisResultToMealRecord(result: AnalysisResult): MealRecord {
+  const mealTime = new Date(result.timestamp);
+  const hour = mealTime.getHours();
+  
+  // 根据时间推断餐次类型
+  let mealType: MealType;
+  if (hour >= 6 && hour < 10) {
+    mealType = MealType.BREAKFAST;
+  } else if (hour >= 11 && hour < 14) {
+    mealType = MealType.LUNCH;
+  } else if (hour >= 17 && hour < 21) {
+    mealType = MealType.DINNER;
+  } else {
+    mealType = MealType.SNACK;
+  }
+  
+  return {
+    id: result.id,
+    userId: 'default',
+    mealType,
+    mealTime,
+    foods: result.foods,
+    totalNutrition: calculateTotalNutrition(result.foods),
+    notes: result.notes,
+    photos: result.imageUrl ? [result.imageUrl] : [],
+    createdAt: mealTime,
+    updatedAt: mealTime,
+  };
+}
+
+/**
  * 从 LocalStorage 获取所有餐次记录
+ * 同时从历史记录中读取并转换数据
  */
 function getMealsFromStorage(): MealRecord[] {
   try {
+    // 1. 读取新格式的 meals 数据
     const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) return [];
-
-    const meals = JSON.parse(data);
-    // 将日期字符串转换回 Date 对象
-    return meals.map((meal: any) => ({
-      ...meal,
-      mealTime: new Date(meal.mealTime),
-      createdAt: new Date(meal.createdAt),
-      updatedAt: new Date(meal.updatedAt),
-    }));
+    let meals: MealRecord[] = [];
+    
+    if (data) {
+      const parsedMeals = JSON.parse(data);
+      meals = parsedMeals.map((meal: any) => ({
+        ...meal,
+        mealTime: new Date(meal.mealTime),
+        createdAt: new Date(meal.createdAt),
+        updatedAt: new Date(meal.updatedAt),
+      }));
+    }
+    
+    // 2. 读取历史记录并转换为 MealRecord
+    const historyRecords = historyStorage.getRecords();
+    const convertedMeals = historyRecords.map(convertAnalysisResultToMealRecord);
+    
+    // 3. 合并两个数据源，去重（优先使用 meals 中的数据）
+    const mealIds = new Set(meals.map(m => m.id));
+    const uniqueConvertedMeals = convertedMeals.filter(m => !mealIds.has(m.id));
+    
+    return [...meals, ...uniqueConvertedMeals];
   } catch (error) {
     console.error('Failed to load meals from storage:', error);
     return [];
