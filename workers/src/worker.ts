@@ -2,7 +2,11 @@ import { Env, getConfig, validateApiKey } from './config';
 import { analyzeImage } from './doubaoClient';
 
 const MAX_REQUEST_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_ORIGINS = ['http://localhost:5173', 'https://your-domain.pages.dev'];
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'https://lucas8848168.github.io',
+  'https://your-domain.pages.dev'
+];
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -12,19 +16,20 @@ export default {
     }
 
     try {
-      // 验证API密钥
-      validateApiKey(env);
-      const config = getConfig(env);
-
       // 路由处理
       const url = new URL(request.url);
       
-      if (url.pathname === '/api/analyze' && request.method === 'POST') {
-        return await handleAnalyze(request, config);
-      }
-
+      // 健康检查不需要验证 API 密钥
       if (url.pathname === '/health' && request.method === 'GET') {
         return handleHealth();
+      }
+
+      // 其他请求需要验证 API 密钥
+      validateApiKey(env);
+      const config = getConfig(env);
+      
+      if (url.pathname === '/api/analyze' && request.method === 'POST') {
+        return await handleAnalyze(request, config);
       }
 
       return jsonResponse({ error: 'Not Found' }, 404);
