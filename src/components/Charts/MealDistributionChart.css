@@ -1,0 +1,299 @@
+.meal-distribution-chart {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.chart-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+  margin: 0;
+}
+
+.total-info {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-bg-tertiary, #f8f9fa);
+  border-radius: 20px;
+}
+
+.total-label {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #666);
+}
+
+.total-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #333);
+}
+
+/* 空状态 */
+.empty-chart {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-text {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-hint {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #666);
+  margin: 0;
+}
+
+/* 自定义Tooltip */
+.meal-distribution-tooltip {
+  background: white;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 150px;
+}
+
+.tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border, #e0e0e0);
+}
+
+.tooltip-icon {
+  font-size: 1.5rem;
+}
+
+.tooltip-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+}
+
+.tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.tooltip-row span {
+  color: var(--color-text-secondary, #666);
+}
+
+.tooltip-row strong {
+  color: var(--color-text-primary, #333);
+  font-weight: 600;
+}
+
+/* 自定义图例 */
+.meal-legend {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.legend-item {
+  padding: 1rem;
+  background: var(--color-bg-tertiary, #f8f9fa);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.legend-item:hover,
+.legend-item.active {
+  background: white;
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.legend-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.legend-icon {
+  font-size: 1.25rem;
+}
+
+.legend-name {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+}
+
+.legend-percentage {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.legend-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #666);
+}
+
+.legend-calories {
+  font-weight: 600;
+}
+
+.legend-count {
+  opacity: 0.8;
+}
+
+.legend-bar {
+  height: 4px;
+  background: var(--color-bg-secondary, #e0e0e0);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.legend-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s ease;
+}
+
+/* 分布分析 */
+.distribution-summary {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #E3F2FD 0%, #E8EAF6 100%);
+  border-left: 4px solid #667eea;
+  border-radius: 8px;
+}
+
+.distribution-summary h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+  margin: 0 0 0.75rem 0;
+}
+
+.summary-content ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: none;
+}
+
+.summary-content li {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #666);
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.summary-content li::before {
+  content: '•';
+  position: absolute;
+  left: -1rem;
+  color: #667eea;
+  font-weight: bold;
+}
+
+.summary-content li:last-child {
+  margin-bottom: 0;
+}
+
+.summary-content strong {
+  color: var(--color-text-primary, #333);
+  font-weight: 600;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .meal-distribution-chart {
+    padding: 1rem;
+  }
+
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .total-info {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .meal-legend {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .empty-icon {
+    font-size: 3rem;
+  }
+
+  .legend-icon {
+    font-size: 1rem;
+  }
+
+  .distribution-summary {
+    padding: 0.75rem;
+  }
+
+  .distribution-summary h4 {
+    font-size: 0.9rem;
+  }
+
+  .summary-content li {
+    font-size: 0.8rem;
+  }
+}
+
+/* 饼图动画 */
+.recharts-pie-sector {
+  transition: all 0.3s ease;
+}
+
+.recharts-pie-sector:hover {
+  filter: brightness(1.1);
+}
+
+/* 激活扇区样式 */
+.recharts-active-shape {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}

@@ -701,3 +701,549 @@ DOUBAO_API_KEY = "从环境变量读取"
 2. 添加营养建议和饮食计划功能
 3. 集成健康追踪API（如Apple Health）
 4. 开发移动应用
+
+
+---
+
+## P1 增强功能设计
+
+### P1 架构概述
+
+P1增强功能在现有架构基础上添加了四个主要模块：
+
+```mermaid
+graph TB
+    subgraph "P1 增强层"
+        MultiFood[多食物识别模块]
+        MealMgmt[餐次管理模块]
+        DataViz[数据可视化模块]
+        GoalMgmt[目标管理模块]
+    end
+    
+    subgraph "现有核心层"
+        ImageProc[图片处理]
+        AIService[AI识别服务]
+        Storage[本地存储]
+    end
+    
+    MultiFood --> ImageProc
+    MultiFood --> AIService
+    MealMgmt --> Storage
+    DataViz --> MealMgmt
+    GoalMgmt --> MealMgmt
+    GoalMgmt --> DataViz
+```
+
+### P1 组件和接口
+
+#### 1. ImageAnnotator 组件
+图片标注组件，支持手动框选食物区域。
+
+**接口**:
+```typescript
+interface ImageAnnotatorProps {
+  imageUrl: string;
+  onRegionsSelected: (regions: BoundingBox[]) => void;
+}
+
+interface BoundingBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+```
+
+**职责**:
+- 显示图片预览
+- 支持鼠标拖拽绘制选择框
+- 支持多个选择框
+- 支持调整和删除选择框
+- 返回所有选择框的坐标
+
+
+#### 2. MealManager 组件
+餐次管理组件，提供时间轴视图和餐次操作。
+
+**接口**:
+```typescript
+interface MealManagerProps {
+  date: Date;
+  onDateChange: (date: Date) => void;
+}
+
+interface MealRecord {
+  id: string;
+  userId: string;
+  mealType: MealType;
+  mealTime: Date;
+  foods: FoodItem[];
+  totalNutrition: NutritionInfo;
+  notes?: string;
+  photos?: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+enum MealType {
+  BREAKFAST = 'breakfast',
+  LUNCH = 'lunch',
+  DINNER = 'dinner',
+  SNACK = 'snack'
+}
+```
+
+**职责**:
+- 显示每日餐次时间轴
+- 按餐次类型分组显示记录
+- 显示每日目标和进度
+- 支持添加、编辑、删除餐次
+- 智能推荐餐次类型
+
+
+#### 3. QuickAddPanel 组件
+快速添加面板，提供常吃食物和最近食用列表。
+
+**接口**:
+```typescript
+interface QuickAddPanelProps {
+  targetMealType: MealType;
+  onFoodAdded: (food: FoodItem) => void;
+}
+
+interface FavoriteFood {
+  id: string;
+  userId: string;
+  foodItem: FoodItem;
+  frequency: number;
+  lastUsed: Date;
+  tags: string[];
+  createdAt: Date;
+}
+```
+
+**职责**:
+- 显示按频率排序的常吃食物
+- 显示最近7天食用的食物
+- 支持一键添加到餐次
+- 管理收藏列表
+- 更新使用频率
+
+
+#### 4. Charts 组件
+数据可视化图表组件集合。
+
+**接口**:
+```typescript
+interface CalorieTrendChartProps {
+  data: ChartDataPoint[];
+  goalLine: number;
+  timePeriod: 'day' | 'week' | 'month';
+}
+
+interface NutritionRadarChartProps {
+  actual: MacroNutrition;
+  target: MacroNutrition;
+}
+
+interface MealDistributionChartProps {
+  meals: MealRecord[];
+  onSegmentClick: (mealType: MealType) => void;
+}
+
+interface ChartDataPoint {
+  date: Date;
+  calories: number;
+  meals: MealRecord[];
+}
+
+interface MacroNutrition {
+  protein: number;
+  fat: number;
+  carbs: number;
+  fiber: number;
+}
+```
+
+**职责**:
+- 绘制卡路里趋势图（折线+柱状）
+- 绘制营养雷达图
+- 绘制餐次分布饼图
+- 支持时间维度切换
+- 支持交互式数据查看
+
+
+#### 5. GoalManager 组件
+目标管理组件，支持目标设置和进度追踪。
+
+**接口**:
+```typescript
+interface GoalManagerProps {
+  onGoalUpdated: (goal: UserGoal) => void;
+}
+
+interface UserGoal {
+  id: string;
+  userId: string;
+  type: GoalType;
+  startDate: Date;
+  targetDate: Date;
+  currentWeight?: number;
+  targetWeight?: number;
+  dailyCalorieGoal: number;
+  macroGoals: MacroNutrition;
+  progress: number;
+  status: 'active' | 'completed' | 'paused';
+}
+
+enum GoalType {
+  WEIGHT_LOSS = 'weight_loss',
+  MUSCLE_GAIN = 'muscle_gain',
+  MAINTAIN = 'maintain',
+  HEALTH = 'health'
+}
+
+interface ReminderSettings {
+  userId: string;
+  enabled: boolean;
+  mealReminders: {
+    breakfast: { enabled: boolean; time: string; };
+    lunch: { enabled: boolean; time: string; };
+    dinner: { enabled: boolean; time: string; };
+  };
+  waterReminder: {
+    enabled: boolean;
+    interval: number;
+    startTime: string;
+    endTime: string;
+  };
+  recordReminder: {
+    enabled: boolean;
+    time: string;
+  };
+}
+```
+
+**职责**:
+- 创建和编辑目标
+- 计算目标进度
+- 显示进度可视化
+- 管理提醒设置
+- 发送浏览器通知
+
+
+
+### P1 正确性属性
+
+*属性是一个特征或行为，应该在系统的所有有效执行中保持为真——本质上是关于系统应该做什么的正式声明。属性作为人类可读规范和机器可验证正确性保证之间的桥梁。*
+
+#### 多食物识别属性
+
+Property 19: 选择框坐标传递完整性
+*对于任何*选择框集合，API请求应该包含所有选择框的坐标信息
+**Validates: Requirements 11.4**
+
+Property 20: 多食物列表显示完整性
+*对于任何*多食物识别结果，显示的食物数量应该等于识别返回的食物数量
+**Validates: Requirements 11.5**
+
+Property 21: 边界框信息显示
+*对于任何*包含边界框的食物项，显示时应该包含其位置信息
+**Validates: Requirements 11.6**
+
+Property 22: 食物删除一致性
+*对于任何*食物列表，删除一个食物后列表长度应该减1且该食物不再存在
+**Validates: Requirements 11.7**
+
+Property 23: 份量调整营养计算
+*对于任何*食物项，将份量调整为原来的N倍后，所有营养值应该也变为原来的N倍
+**Validates: Requirements 11.8**
+
+Property 24: 多食物营养总和
+*对于任何*食物列表，总营养值应该等于各个食物营养值的总和
+**Validates: Requirements 11.9**
+
+
+#### 餐次管理属性
+
+Property 25: 时间到餐次类型映射
+*对于任何*时间，系统推荐的餐次类型应该符合时段规则（5-10早餐，11-14午餐，17-21晚餐，其他加餐）
+**Validates: Requirements 12.2, 12.3, 12.4, 12.5**
+
+Property 26: 餐次分组显示
+*对于任何*日期的餐次记录，按餐次类型分组后每组应该只包含该类型的餐次
+**Validates: Requirements 12.6**
+
+Property 27: 餐次展开信息完整性
+*对于任何*餐次，展开显示时应该包含所有食物项和正确的营养小计
+**Validates: Requirements 12.8**
+
+Property 28: 收藏食物往返一致性
+*对于任何*食物项，添加到收藏后再检索应该得到相同的食物信息
+**Validates: Requirements 12.9**
+
+Property 29: 常吃食物频率排序
+*对于任何*常吃食物列表，应该按使用频率降序排列
+**Validates: Requirements 12.10**
+
+Property 30: 最近食用时间过滤
+*对于任何*最近食用列表，所有食物的最后使用时间应该在最近7天内
+**Validates: Requirements 12.11**
+
+Property 31: 快速添加频率更新
+*对于任何*从快速添加面板选择的食物，其使用频率应该增加1
+**Validates: Requirements 12.12**
+
+Property 32: 模板往返一致性
+*对于任何*饮食模板，保存后再读取应该得到相同的食物列表和营养信息
+**Validates: Requirements 12.13**
+
+Property 33: 模板应用完整性
+*对于任何*饮食模板，应用到餐次后该餐次应该包含模板中的所有食物
+**Validates: Requirements 12.14**
+
+Property 34: 餐次删除一致性
+*对于任何*餐次记录，删除后从存储中查询应该返回undefined
+**Validates: Requirements 12.15**
+
+
+#### 数据可视化属性
+
+Property 35: 目标线显示
+*对于任何*设置了目标的卡路里趋势图，应该显示目标线
+**Validates: Requirements 13.3**
+
+Property 36: 雷达图双值显示
+*对于任何*营养雷达图，应该同时显示实际值和目标值两个数据系列
+**Validates: Requirements 13.7**
+
+Property 37: 餐次分布完整性
+*对于任何*餐次分布图，应该包含所有四种餐次类型的扇区（即使某些为0）
+**Validates: Requirements 13.9**
+
+Property 38: 时间维度数据过滤
+*对于任何*时间维度选择，图表数据应该只包含该时间范围内的餐次记录
+**Validates: Requirements 13.11, 13.12, 13.13**
+
+Property 39: 时间范围数据完整性
+*对于任何*指定的时间范围，图表应该包含该范围内的所有餐次记录
+**Validates: Requirements 13.14**
+
+Property 40: 平均卡路里计算准确性
+*对于任何*餐次记录集合，平均每日卡路里应该等于总卡路里除以天数
+**Validates: Requirements 13.15**
+
+
+#### 目标管理属性
+
+Property 41: 目标验证
+*对于任何*目标数据，如果缺少必填字段或数值不合理，保存操作应该失败
+**Validates: Requirements 14.5**
+
+Property 42: 进度百分比计算
+*对于任何*每日摄入和目标值，进度百分比应该等于（实际摄入/目标值）× 100
+**Validates: Requirements 14.6**
+
+Property 43: 连续达标徽章显示
+*对于任何*连续达标天数大于等于3的情况，应该显示连续达标徽章
+**Validates: Requirements 14.9**
+
+Property 44: 提醒权限请求
+*对于任何*未授权通知权限的情况，发送提醒前应该请求权限
+**Validates: Requirements 14.14**
+
+Property 45: 通知点击导航
+*对于任何*提醒通知，点击后应该导航到对应的功能页面
+**Validates: Requirements 14.15**
+
+
+
+### P1 测试策略
+
+#### 属性测试配置
+
+使用fast-check库进行属性测试，每个测试运行至少100次迭代。
+
+**P1测试生成器**:
+
+```typescript
+// 边界框生成器
+const boundingBoxArb = fc.record({
+  x: fc.integer({ min: 0, max: 1920 }),
+  y: fc.integer({ min: 0, max: 1080 }),
+  width: fc.integer({ min: 10, max: 500 }),
+  height: fc.integer({ min: 10, max: 500 })
+});
+
+// 餐次类型生成器
+const mealTypeArb = fc.constantFrom(
+  'breakfast', 'lunch', 'dinner', 'snack'
+);
+
+// 餐次记录生成器
+const mealRecordArb = fc.record({
+  id: fc.uuid(),
+  userId: fc.uuid(),
+  mealType: mealTypeArb,
+  mealTime: fc.date(),
+  foods: fc.array(foodItemArb, { minLength: 1, maxLength: 10 }),
+  totalNutrition: nutritionInfoArb,
+  createdAt: fc.date()
+});
+
+// 目标生成器
+const userGoalArb = fc.record({
+  id: fc.uuid(),
+  userId: fc.uuid(),
+  type: fc.constantFrom('weight_loss', 'muscle_gain', 'maintain', 'health'),
+  startDate: fc.date(),
+  targetDate: fc.date(),
+  dailyCalorieGoal: fc.integer({ min: 1200, max: 3000 }),
+  macroGoals: fc.record({
+    protein: fc.float({ min: 50, max: 200 }),
+    fat: fc.float({ min: 30, max: 100 }),
+    carbs: fc.float({ min: 100, max: 400 }),
+    fiber: fc.float({ min: 20, max: 50 })
+  }),
+  progress: fc.float({ min: 0, max: 100 }),
+  status: fc.constantFrom('active', 'completed', 'paused')
+});
+```
+
+
+#### 属性测试标注示例
+
+每个属性测试必须包含注释，明确标注其对应的设计文档中的属性：
+
+```typescript
+// **Feature: food-calorie-analyzer, Property 24: 多食物营养总和**
+it('多食物总营养应该等于各食物营养之和', () => {
+  fc.assert(
+    fc.property(fc.array(foodItemArb), (foods) => {
+      const result = calculateTotalNutrition(foods);
+      const expected = foods.reduce((sum, food) => ({
+        protein: sum.protein + food.nutrition.protein,
+        fat: sum.fat + food.nutrition.fat,
+        carbs: sum.carbs + food.nutrition.carbs,
+        fiber: sum.fiber + food.nutrition.fiber
+      }), { protein: 0, fat: 0, carbs: 0, fiber: 0 });
+      return (
+        result.protein === expected.protein &&
+        result.fat === expected.fat &&
+        result.carbs === expected.carbs &&
+        result.fiber === expected.fiber
+      );
+    }),
+    { numRuns: 100 }
+  );
+});
+
+// **Feature: food-calorie-analyzer, Property 25: 时间到餐次类型映射**
+it('时间应该正确映射到餐次类型', () => {
+  fc.assert(
+    fc.property(fc.integer({ min: 0, max: 23 }), (hour) => {
+      const mealType = getMealTypeByHour(hour);
+      if (hour >= 5 && hour < 10) return mealType === 'breakfast';
+      if (hour >= 11 && hour < 14) return mealType === 'lunch';
+      if (hour >= 17 && hour < 21) return mealType === 'dinner';
+      return mealType === 'snack';
+    }),
+    { numRuns: 100 }
+  );
+});
+```
+
+
+
+### P1 数据持久化策略
+
+#### LocalStorage 结构扩展
+
+```typescript
+interface LocalStorageSchema {
+  // 现有数据
+  history: AnalysisResult[];
+  
+  // P1 新增数据
+  meals: MealRecord[];
+  goals: UserGoal[];
+  favorites: FavoriteFood[];
+  templates: MealTemplate[];
+  reminders: ReminderSettings;
+  userProfile: {
+    currentWeight?: number;
+    height?: number;
+    age?: number;
+    gender?: 'male' | 'female';
+  };
+}
+```
+
+#### 数据管理服务
+
+```typescript
+// mealService.ts
+export const mealService = {
+  saveMeal: (meal: MealRecord) => void;
+  getMealsByDate: (date: Date) => MealRecord[];
+  getMealsByDateRange: (start: Date, end: Date) => MealRecord[];
+  updateMeal: (id: string, updates: Partial<MealRecord>) => void;
+  deleteMeal: (id: string) => void;
+};
+
+// goalService.ts
+export const goalService = {
+  saveGoal: (goal: UserGoal) => void;
+  getActiveGoal: () => UserGoal | null;
+  updateGoalProgress: (goalId: string) => void;
+  calculateProgress: (goal: UserGoal, meals: MealRecord[]) => number;
+};
+
+// favoriteService.ts
+export const favoriteService = {
+  addFavorite: (food: FoodItem) => void;
+  removeFavorite: (id: string) => void;
+  getFavorites: () => FavoriteFood[];
+  updateFrequency: (foodId: string) => void;
+  getRecentFoods: (days: number) => FoodItem[];
+};
+```
+
+
+
+### P1 性能优化
+
+#### 图表渲染优化
+1. **数据采样**: 月视图时对数据点进行采样，避免渲染过多点
+2. **懒加载**: 图表组件按需加载，减少初始包大小
+3. **缓存计算**: 使用useMemo缓存图表数据计算结果
+4. **虚拟化**: 长列表使用虚拟滚动
+
+#### 存储优化
+1. **数据分片**: 按月份分片存储餐次记录
+2. **索引**: 为日期和餐次类型建立索引加速查询
+3. **清理策略**: 自动清理90天前的详细记录，保留统计数据
+4. **压缩**: 使用LZ-String压缩大对象
+
+#### 提醒系统优化
+1. **Service Worker**: 使用Service Worker实现后台提醒
+2. **批量调度**: 一次性调度所有提醒，避免重复计算
+3. **节能模式**: 检测设备电量，低电量时减少提醒频率
+
+### P1 错误处理
+
+#### 数据验证错误
+- **场景**: 用户输入无效的目标数据
+- **处理**: 显示具体的验证错误信息，高亮错误字段
+- **错误代码**: `INVALID_GOAL_DATA`, `INVALID_DATE_RANGE`
+
+#### 存储容量错误
+- **场景**: LocalStorage接近容量限制
+- **处理**: 提示用户清理旧数据，提供一键清理功能
+- **错误代码**: `STORAGE_NEAR_LIMIT`, `STORAGE_FULL`
+
+#### 通知权限错误
+- **场景**: 用户拒绝通知权限
+- **处理**: 显示友好提示，说明如何在浏览器设置中启用
+- **错误代码**: `NOTIFICATION_PERMISSION_DENIED`
+

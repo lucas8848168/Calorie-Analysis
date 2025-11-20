@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { AnalysisDisplayProps } from '../types';
+import { AnalysisDisplayProps, MealType } from '../types';
 import { formatCalories, formatNutrition } from '../utils/dataParser';
+import { saveMeal } from '../services/mealService';
 import EmptyState from './EmptyState';
+import MealTypeSelector from './MealManager/MealTypeSelector';
 import './AnalysisDisplay.css';
 
 const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({
@@ -9,6 +11,10 @@ const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({
   onNewAnalysis,
 }) => {
   const [animatedCalories, setAnimatedCalories] = useState(0);
+  const [showSaveMeal, setShowSaveMeal] = useState(false);
+  const [selectedMealType, setSelectedMealType] = useState<MealType>(MealType.BREAKFAST);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // 数字滚动动画
   useEffect(() => {
@@ -58,6 +64,43 @@ const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({
   // 计算每日推荐摄入百分比（假设 2000 kcal）
   const dailyGoal = 2000;
   const caloriePercentage = Math.min((result.totalCalories / dailyGoal) * 100, 100);
+
+  // 处理保存到餐次
+  const handleSaveToMeal = () => {
+    setShowSaveMeal(true);
+  };
+
+  const handleConfirmSave = () => {
+    setIsSaving(true);
+    
+    try {
+      // 保存餐次记录
+      saveMeal({
+        userId: 'default',
+        mealType: selectedMealType,
+        mealTime: new Date(),
+        foods: result.foods,
+        totalNutrition: totalNutrition,
+      });
+
+      setSaveSuccess(true);
+      
+      // 2秒后关闭成功提示
+      setTimeout(() => {
+        setShowSaveMeal(false);
+        setSaveSuccess(false);
+      }, 2000);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '保存失败，请重试');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelSave = () => {
+    setShowSaveMeal(false);
+    setSaveSuccess(false);
+  };
 
   return (
     <div className="analysis-display-v2 animate-fadeIn">
@@ -157,6 +200,54 @@ const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({
             <h4 className="advice-title">健康建议</h4>
             <p className="advice-text">{result.notes}</p>
           </div>
+        </div>
+      )}
+
+      {/* 保存到餐次 */}
+      {!showSaveMeal && !saveSuccess && (
+        <div className="save-meal-section card">
+          <h3 className="section-title">保存记录</h3>
+          <p className="save-hint">将此次分析结果保存到餐次记录，方便追踪每日饮食</p>
+          <button onClick={handleSaveToMeal} className="btn btn-success btn-lg">
+            💾 保存到餐次
+          </button>
+        </div>
+      )}
+
+      {/* 餐次类型选择 */}
+      {showSaveMeal && !saveSuccess && (
+        <div className="meal-save-form card">
+          <h3 className="section-title">选择餐次类型</h3>
+          <MealTypeSelector
+            selectedType={selectedMealType}
+            onTypeChange={setSelectedMealType}
+            showRecommendation={true}
+          />
+          <div className="save-actions">
+            <button
+              onClick={handleConfirmSave}
+              className="btn btn-primary btn-lg"
+              disabled={isSaving}
+            >
+              {isSaving ? '保存中...' : '✓ 确认保存'}
+            </button>
+            <button
+              onClick={handleCancelSave}
+              className="btn btn-secondary"
+              disabled={isSaving}
+            >
+              取消
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 保存成功提示 */}
+      {saveSuccess && (
+        <div className="save-success card">
+          <div className="success-icon">✓</div>
+          <h3>保存成功！</h3>
+          <p>餐次记录已保存，您可以在餐次管理中查看</p>
         </div>
       )}
 

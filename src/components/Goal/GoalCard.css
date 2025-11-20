@@ -1,0 +1,392 @@
+.goal-card {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.goal-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.goal-card.paused {
+  opacity: 0.7;
+}
+
+/* 卡片头部 */
+.goal-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.goal-type-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.type-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.type-label {
+  line-height: 1;
+}
+
+.goal-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: #f3f4f6;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover:not(:disabled) {
+  background: #e5e7eb;
+  transform: scale(1.05);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 目标概览 */
+.goal-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-radius: 12px;
+}
+
+.weight-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.weight-current {
+  color: #6b7280;
+}
+
+.weight-arrow {
+  color: #9ca3af;
+  font-size: 20px;
+}
+
+.weight-target {
+  color: #3b82f6;
+}
+
+.date-range {
+  text-align: center;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* 连续达标徽章 */
+.achievement-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-radius: 12px;
+  border: 2px solid #fca5a5;
+}
+
+.badge-icon {
+  font-size: 20px;
+  animation: flame 1.5s ease-in-out infinite;
+}
+
+@keyframes flame {
+  0%,
+  100% {
+    transform: scale(1) rotate(-5deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
+.badge-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #991b1b;
+}
+
+/* 今日达成情况 */
+.daily-status {
+  margin-bottom: 20px;
+}
+
+.status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.status-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.status-indicator {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-indicator.achieved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-indicator.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* 卡路里进度 */
+.calorie-progress {
+  margin-bottom: 16px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.progress-value {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.progress-bar-wrapper {
+  height: 12px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #9ca3af 0%, #6b7280 100%);
+  border-radius: 6px;
+  transition: width 0.5s ease, background 0.3s ease;
+}
+
+.progress-bar.achieved {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+}
+
+/* 营养素对比 */
+.nutrition-comparison {
+  margin-top: 20px;
+}
+
+.nutrition-comparison h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+}
+
+.nutrients-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.nutrient-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nutrient-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nutrient-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.nutrient-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.nutrient-values {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.actual-value {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.target-value {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.nutrient-bar-wrapper {
+  height: 6px;
+  background: #f3f4f6;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.nutrient-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #d1d5db 0%, #9ca3af 100%);
+  border-radius: 3px;
+  transition: width 0.5s ease, background 0.3s ease;
+}
+
+.nutrient-bar.achieved {
+  background: linear-gradient(90deg, #34d399 0%, #10b981 100%);
+}
+
+/* 暂停遮罩 */
+.paused-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.paused-label {
+  padding: 12px 24px;
+  background: #f3f4f6;
+  border: 2px solid #d1d5db;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .goal-card {
+    padding: 20px;
+  }
+
+  .goal-type-badge {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .type-icon {
+    font-size: 16px;
+  }
+
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .weight-info {
+    font-size: 16px;
+  }
+
+  .nutrients-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .status-header h3,
+  .nutrition-comparison h3 {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .goal-card {
+    padding: 16px;
+  }
+
+  .goal-overview {
+    padding: 12px;
+  }
+
+  .weight-info {
+    font-size: 15px;
+  }
+
+  .date-range {
+    font-size: 12px;
+  }
+
+  .achievement-badge {
+    padding: 10px;
+  }
+
+  .badge-icon {
+    font-size: 18px;
+  }
+
+  .badge-text {
+    font-size: 13px;
+  }
+
+  .progress-label,
+  .nutrient-values {
+    font-size: 13px;
+  }
+}

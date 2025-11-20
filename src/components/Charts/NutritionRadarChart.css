@@ -1,0 +1,286 @@
+.nutrition-radar-chart {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.chart-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+  margin: 0;
+}
+
+/* 均衡度评分 */
+.balance-score {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-bg-tertiary, #f8f9fa);
+  border-radius: 20px;
+}
+
+.score-label {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #666);
+}
+
+.score-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.score-level {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* 自定义Tooltip */
+.nutrition-tooltip {
+  background: white;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tooltip-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+  margin: 0 0 0.5rem 0;
+}
+
+.tooltip-values {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.tooltip-row .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.tooltip-row.actual .dot {
+  background: #667eea;
+}
+
+.tooltip-row.target .dot {
+  background: #4CAF50;
+}
+
+/* 营养详情对比 */
+.nutrition-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border, #e0e0e0);
+}
+
+.nutrition-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+}
+
+.detail-percentage {
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+  border-radius: 12px;
+}
+
+.detail-percentage.good {
+  background: #E8F5E9;
+  color: #4CAF50;
+}
+
+.detail-percentage.under {
+  background: #FFF8E1;
+  color: #FFC107;
+}
+
+.detail-percentage.over {
+  background: #FFEBEE;
+  color: #F44336;
+}
+
+.detail-values {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.detail-actual {
+  font-weight: 700;
+  color: #667eea;
+}
+
+.detail-separator {
+  color: var(--color-text-tertiary, #999);
+}
+
+.detail-target {
+  color: var(--color-text-secondary, #666);
+}
+
+.detail-bar {
+  height: 6px;
+  background: var(--color-bg-secondary, #e0e0e0);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.detail-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+
+.detail-bar-fill.good {
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+}
+
+.detail-bar-fill.under {
+  background: linear-gradient(90deg, #FFC107, #FFD54F);
+}
+
+.detail-bar-fill.over {
+  background: linear-gradient(90deg, #F44336, #FF7043);
+}
+
+/* 营养建议 */
+.nutrition-advice {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+  border-left: 4px solid #4CAF50;
+  border-radius: 8px;
+}
+
+.nutrition-advice h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+  margin: 0 0 0.75rem 0;
+}
+
+.nutrition-advice ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: none;
+}
+
+.nutrition-advice li {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #666);
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.nutrition-advice li::before {
+  content: '•';
+  position: absolute;
+  left: -1rem;
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.nutrition-advice li:last-child {
+  margin-bottom: 0;
+}
+
+.nutrition-advice strong {
+  color: var(--color-text-primary, #333);
+  font-weight: 600;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .nutrition-radar-chart {
+    padding: 1rem;
+  }
+
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .balance-score {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nutrition-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .score-value {
+    font-size: 1.25rem;
+  }
+
+  .nutrition-advice {
+    padding: 0.75rem;
+  }
+
+  .nutrition-advice h4 {
+    font-size: 0.9rem;
+  }
+
+  .nutrition-advice li {
+    font-size: 0.8rem;
+  }
+}
+
+/* 图表动画 */
+.recharts-radar-polygon {
+  animation: radarFadeIn 1s ease-out;
+}
+
+@keyframes radarFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -1,4 +1,4 @@
-import { AnalyzeRequest, AnalyzeResponse } from '../types';
+import { AnalyzeRequest, AnalyzeResponse, BoundingBox } from '../types';
 
 const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || 'http://localhost:8787';
 const REQUEST_TIMEOUT = 60000; // 60秒（豆包 API 通常需要 30-60 秒）
@@ -6,20 +6,24 @@ const FALLBACK_TIMEOUT = 120000; // 降级策略超时120秒（复杂图片需�
 
 /**
  * 分析食物图片（带超时和降级策略）
+ * @param imageDataUrl - Base64编码的图片数据
+ * @param format - 图片格式
+ * @param regions - 可选的边界框数组，用于多食物识别
  */
 export async function analyzeFood(
   imageDataUrl: string,
-  format: string
+  format: string,
+  regions?: BoundingBox[]
 ): Promise<AnalyzeResponse> {
   // 第一次尝试：正常超时
   try {
-    return await analyzeFoodWithTimeout(imageDataUrl, format, REQUEST_TIMEOUT);
+    return await analyzeFoodWithTimeout(imageDataUrl, format, REQUEST_TIMEOUT, regions);
   } catch (error: any) {
     // 如果是超时错误，尝试降级策略
     if (error.message.includes('REQUEST_TIMEOUT')) {
       console.warn('First attempt timed out, trying with extended timeout...');
       try {
-        return await analyzeFoodWithTimeout(imageDataUrl, format, FALLBACK_TIMEOUT);
+        return await analyzeFoodWithTimeout(imageDataUrl, format, FALLBACK_TIMEOUT, regions);
       } catch (fallbackError: any) {
         // 降级也失败，返回友好提示
         throw new Error('REQUEST_TIMEOUT: 分析超时（已尝试120秒）。这张图片可能包含太多种类的食物。建议：1) 只拍摄单次用餐的食物 2) 避免拍摄整个餐桌或食材展示图 3) 如需分析多种食物，请分批上传');
@@ -35,16 +39,22 @@ export async function analyzeFood(
 async function analyzeFoodWithTimeout(
   imageDataUrl: string,
   format: string,
-  timeout: number
+  timeout: number,
+  regions?: BoundingBox[]
 ): Promise<AnalyzeResponse> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const request: AnalyzeRequest = {
+    const request: AnalyzeRequest & { regions?: BoundingBox[] } = {
       image: imageDataUrl,
       format,
     };
+
+    // 如果提供了区域信息，添加到请求中
+    if (regions && regions.length > 0) {
+      request.regions = regions;
+    }
 
     const response = await fetch(`${API_ENDPOINT}/api/analyze`, {
       method: 'POST',
@@ -65,6 +75,15 @@ async function analyzeFoodWithTimeout(
     }
 
     const data: AnalyzeResponse = await response.json();
+    
+    // 如果响应中的食物项包含边界框信息，确保它们被正确传递
+    if (data.data?.foods && regions && regions.length > 0) {
+      data.data.foods = data.data.foods.map((food, index) => ({
+        ...food,
+        boundingBox: regions[index] || undefined,
+      }));
+    }
+    
     return data;
   } catch (error: any) {
     clearTimeout(timeoutId);

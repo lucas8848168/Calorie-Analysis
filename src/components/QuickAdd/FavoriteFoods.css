@@ -1,0 +1,177 @@
+.favorite-foods {
+  width: 100%;
+}
+
+.food-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.food-card {
+  position: relative;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 16px 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.food-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
+.remove-favorite {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.food-card:hover .remove-favorite {
+  opacity: 1;
+}
+
+.remove-favorite:hover {
+  background: #f44336;
+  transform: scale(1.1);
+}
+
+.food-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.food-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.food-calories {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.add-button {
+  width: 100%;
+  padding: 6px 12px;
+  border: 1px solid #667eea;
+  border-radius: 6px;
+  background: white;
+  color: #667eea;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.add-button:hover {
+  background: #667eea;
+  color: white;
+  transform: scale(1.05);
+}
+
+.add-button:active {
+  transform: scale(0.98);
+}
+
+/* 空状态 */
+.empty-favorites {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  min-height: 250px;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-message {
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  margin: 0 0 8px 0;
+}
+
+.empty-hint {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+  max-width: 300px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .food-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+
+  .food-card {
+    padding: 12px 8px;
+  }
+
+  .food-icon {
+    font-size: 32px;
+  }
+
+  .food-name {
+    font-size: 13px;
+  }
+
+  .food-calories {
+    font-size: 11px;
+  }
+
+  .add-button {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+  }
+
+  .empty-message {
+    font-size: 14px;
+  }
+
+  .empty-hint {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .food-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
