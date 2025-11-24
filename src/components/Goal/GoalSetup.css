@@ -292,3 +292,77 @@
     font-size: 0.7rem;
   }
 }
+
+
+/* 推荐信息框 */
+.recommendation-box {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+  border: 2px solid #4caf50;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.recommendation-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.recommendation-content {
+  flex: 1;
+}
+
+.recommendation-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2e7d32;
+  margin-bottom: 0.5rem;
+}
+
+.recommendation-text {
+  font-size: 0.875rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.recommendation-note {
+  font-size: 0.75rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* 警告信息框 */
+.warning-box {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #fff3e0;
+  border: 2px solid #ff9800;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.warning-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.warning-content {
+  flex: 1;
+}
+
+.warning-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e65100;
+  margin-bottom: 0.5rem;
+}
+
+.warning-text {
+  font-size: 0.875rem;
+  color: #333;
+  line-height: 1.5;
+}

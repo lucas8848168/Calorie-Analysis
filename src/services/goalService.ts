@@ -248,24 +248,24 @@ export function updateGoalProgress(goalId: string): UserGoal | null {
 /**
  * 检查每日目标达成情况
  */
-export function checkDailyGoalAchievement(
+export async function checkDailyGoalAchievement(
   goal: UserGoal,
   date: Date = new Date()
-): {
+): Promise<{
   caloriesAchieved: boolean;
   proteinAchieved: boolean;
   fatAchieved: boolean;
   carbsAchieved: boolean;
   fiberAchieved: boolean;
   overallAchieved: boolean;
-} {
+}> {
   const startDate = new Date(date);
   startDate.setHours(0, 0, 0, 0);
 
   const endDate = new Date(date);
   endDate.setHours(23, 59, 59, 999);
 
-  const meals = getMealsByDateRange(startDate, endDate);
+  const meals = await getMealsByDateRange(startDate, endDate);
 
   // 计算当日总摄入
   const totalCalories = meals.reduce((sum, meal) => {
@@ -323,7 +323,7 @@ export function checkDailyGoalAchievement(
 /**
  * 计算连续达标天数
  */
-export function calculateConsecutiveDays(goal: UserGoal): number {
+export async function calculateConsecutiveDays(goal: UserGoal): Promise<number> {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -332,7 +332,7 @@ export function calculateConsecutiveDays(goal: UserGoal): number {
 
   // 从今天往前检查
   while (currentDate >= new Date(goal.startDate)) {
-    const achievement = checkDailyGoalAchievement(goal, currentDate);
+    const achievement = await checkDailyGoalAchievement(goal, currentDate);
 
     if (achievement.overallAchieved) {
       consecutiveDays++;
@@ -348,13 +348,13 @@ export function calculateConsecutiveDays(goal: UserGoal): number {
 /**
  * 获取目标统计信息
  */
-export function getGoalStats(goal: UserGoal): {
+export async function getGoalStats(goal: UserGoal): Promise<{
   daysElapsed: number;
   daysRemaining: number;
   totalDays: number;
   consecutiveDays: number;
   achievementRate: number;
-} {
+}> {
   const now = new Date();
   const start = new Date(goal.startDate);
   const target = new Date(goal.targetDate);
@@ -369,7 +369,7 @@ export function getGoalStats(goal: UserGoal): {
     Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
   );
 
-  const consecutiveDays = calculateConsecutiveDays(goal);
+  const consecutiveDays = await calculateConsecutiveDays(goal);
 
   // 计算达成率（检查已过去的天数中有多少天达标）
   let achievedDays = 0;
@@ -377,7 +377,7 @@ export function getGoalStats(goal: UserGoal): {
   const endCheckDate = new Date(Math.min(now.getTime(), target.getTime()));
 
   while (checkDate <= endCheckDate) {
-    const achievement = checkDailyGoalAchievement(goal, checkDate);
+    const achievement = await checkDailyGoalAchievement(goal, checkDate);
     if (achievement.overallAchieved) {
       achievedDays++;
     }

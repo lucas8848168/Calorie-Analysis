@@ -63,29 +63,39 @@ GITHUB_*_COMPLETE.md
 GITHUB_*_SUCCESS.md
 快速部署指引.md
 CLOUDFLARE_FREE_TIER_ANALYSIS.md
+SECURITY_*.md
 
-# -------------------- 项目管理文档（可选）--------------------
-# 内部项目管理文档，不需要公开
-TASK_*.md
-P1_*.md
-*_COMPLETION_*.md
-*_CHECKPOINT_*.md
-PROJECT_FINAL_ARCHIVE.md
-PROJECT_ORGANIZATION_LOG.md
-PROJECT_PRESENTATION_SUMMARY.md
-UX_OPTIMIZATION_RECOMMENDATIONS.md
+# -------------------- 核心文档和技术文档 --------------------
+# 所有内部文档、规范、技术文档都不上传
+# 只保留 README.md（专门为 GitHub 编写的简介）
+
+# 保护所有 .md 文件，除了 README.md
+*.md
+!README.md
+!.github/**/*.md
+
+# 规范文档（.kiro 目录下的所有规范）
+.kiro/specs/
+.kiro/steering/
+
+# 其他技术文档
+docs/
 
 # -------------------- 私有目录 --------------------
 # 存放所有不想公开的文件
 .private/
-
-# -------------------- 安全分析文档（可选）--------------------
-# 这些是分析文档，可以选择不上传
-# SECURITY_ANALYSIS.md
-# SECURITY_SOLUTION.md
-
-# 后端核心代码（保护商业逻辑）
-workers/src/doubaoClient.ts
-workers/src/config.ts
 demo-portfolio/
 demo-frontend-only/
+ppt-materials/
+
+# -------------------- 后端核心代码（保护商业逻辑）--------------------
+# Workers 核心业务逻辑不上传到 GitHub
+workers/src/doubaoClient.ts
+workers/src/config.ts
+workers/src/mockData.ts
+
+# -------------------- 部署脚本 --------------------
+# 包含敏感信息的部署脚本
+deploy.bat
+deploy.sh
+scripts/

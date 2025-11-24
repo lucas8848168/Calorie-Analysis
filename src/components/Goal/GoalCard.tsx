@@ -20,12 +20,15 @@ interface GoalCardProps {
  * 显示目标概览、每日达成情况、营养素对比、连续达标徽章
  */
 const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onStatusChange }) => {
-  const [dailyAchievement, setDailyAchievement] = useState(() =>
-    checkDailyGoalAchievement(goal)
-  );
-  const [consecutiveDays, setConsecutiveDays] = useState(() =>
-    calculateConsecutiveDays(goal)
-  );
+  const [dailyAchievement, setDailyAchievement] = useState({
+    caloriesAchieved: false,
+    proteinAchieved: false,
+    fatAchieved: false,
+    carbsAchieved: false,
+    fiberAchieved: false,
+    overallAchieved: false,
+  });
+  const [consecutiveDays, setConsecutiveDays] = useState(0);
   const [todayIntake, setTodayIntake] = useState({
     calories: 0,
     protein: 0,
@@ -37,34 +40,41 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onStatusChange }) => 
 
   // 获取今日摄入数据
   useEffect(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(today);
-    endOfDay.setHours(23, 59, 59, 999);
+    const loadData = async () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(today);
+      endOfDay.setHours(23, 59, 59, 999);
 
-    const meals = getMealsByDateRange(today, endOfDay);
+      const meals = await getMealsByDateRange(today, endOfDay);
 
-    const totalCalories = meals.reduce((sum, meal) => {
-      return sum + meal.foods.reduce((mealSum, food) => mealSum + food.calories, 0);
-    }, 0);
+      const totalCalories = meals.reduce((sum, meal) => {
+        return sum + meal.foods.reduce((mealSum, food) => mealSum + food.calories, 0);
+      }, 0);
 
-    const totalNutrition = meals.reduce(
-      (total, meal) => ({
-        protein: total.protein + meal.totalNutrition.protein,
-        fat: total.fat + meal.totalNutrition.fat,
-        carbs: total.carbs + meal.totalNutrition.carbs,
-        fiber: total.fiber + meal.totalNutrition.fiber,
-      }),
-      { protein: 0, fat: 0, carbs: 0, fiber: 0 }
-    );
+      const totalNutrition = meals.reduce(
+        (total, meal) => ({
+          protein: total.protein + meal.totalNutrition.protein,
+          fat: total.fat + meal.totalNutrition.fat,
+          carbs: total.carbs + meal.totalNutrition.carbs,
+          fiber: total.fiber + meal.totalNutrition.fiber,
+        }),
+        { protein: 0, fat: 0, carbs: 0, fiber: 0 }
+      );
 
-    setTodayIntake({
-      calories: totalCalories,
-      ...totalNutrition,
-    });
+      setTodayIntake({
+        calories: totalCalories,
+        ...totalNutrition,
+      });
 
-    setDailyAchievement(checkDailyGoalAchievement(goal));
-    setConsecutiveDays(calculateConsecutiveDays(goal));
+      const achievement = await checkDailyGoalAchievement(goal);
+      setDailyAchievement(achievement);
+      
+      const consecutive = await calculateConsecutiveDays(goal);
+      setConsecutiveDays(consecutive);
+    };
+
+    loadData();
   }, [goal]);
 
   // 获取目标类型信息

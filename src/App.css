@@ -9,22 +9,9 @@
 .app-header {
   background: var(--gradient-primary);
   color: white;
+  text-align: center;
   padding: var(--spacing-2xl) var(--spacing-lg);
   box-shadow: var(--shadow-md);
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-  gap: var(--spacing-lg);
-}
-
-.header-title {
-  flex: 1;
-  text-align: left;
 }
 
 .app-header h1 {
@@ -38,30 +25,6 @@
   font-size: var(--font-base);
   opacity: 0.95;
   font-weight: var(--font-weight-normal);
-}
-
-.header-actions {
-  flex-shrink: 0;
-}
-
-.login-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  padding: 0.625rem 1.5rem;
-  border-radius: 24px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  backdrop-filter: blur(10px);
-}
-
-.login-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .app-nav {
@@ -230,23 +193,6 @@
 }
 
 @media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-md);
-  }
-
-  .header-title {
-    text-align: center;
-    width: 100%;
-  }
-
-  .header-actions {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
   .app-header h1 {
     font-size: 28px;
   }

@@ -12,12 +12,22 @@ interface GoalProgressProps {
  * 显示目标的进度百分比、已坚持天数、预计剩余天数
  */
 const GoalProgress: React.FC<GoalProgressProps> = ({ goal }) => {
-  const [stats, setStats] = useState(() => getGoalStats(goal));
+  const [stats, setStats] = useState({
+    daysElapsed: 0,
+    daysRemaining: 0,
+    totalDays: 0,
+    consecutiveDays: 0,
+    achievementRate: 0,
+  });
   const [animatedProgress, setAnimatedProgress] = useState(0);
 
   // 更新统计数据
   useEffect(() => {
-    setStats(getGoalStats(goal));
+    const loadStats = async () => {
+      const goalStats = await getGoalStats(goal);
+      setStats(goalStats);
+    };
+    loadStats();
   }, [goal]);
 
   // 进度条动画

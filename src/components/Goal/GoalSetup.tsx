@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
-import { GoalType } from '../../types';
-import { createGoal } from '../../services/goalService';
+import React, { useState, useEffect } from 'react';
+import { GoalType, UserGoal } from '../../types';
+import { createGoal, updateGoal } from '../../services/goalService';
+import { getCurrentUser } from '../../services/userService';
+import {
+  calculateRecommendedGoals,
+  getGoalTypeRecommendation,
+} from '../../services/nutritionCalculator';
 import './GoalSetup.css';
 
 interface GoalSetupProps {
+  existingGoal?: UserGoal; // 如果提供，则为编辑模式
   onGoalCreated?: () => void;
   onCancel?: () => void;
 }
@@ -12,19 +18,78 @@ interface GoalSetupProps {
  * 目标设置组件
  * 允许用户创建新的健康目标
  */
-const GoalSetup: React.FC<GoalSetupProps> = ({ onGoalCreated, onCancel }) => {
-  const [goalType, setGoalType] = useState<GoalType>(GoalType.HEALTH);
-  const [currentWeight, setCurrentWeight] = useState('');
-  const [targetWeight, setTargetWeight] = useState('');
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-  const [targetDate, setTargetDate] = useState('');
-  const [dailyCalories, setDailyCalories] = useState('2000');
-  const [protein, setProtein] = useState('50');
-  const [fat, setFat] = useState('65');
-  const [carbs, setCarbs] = useState('275');
-  const [fiber, setFiber] = useState('25');
+const GoalSetup: React.FC<GoalSetupProps> = ({ existingGoal, onGoalCreated, onCancel }) => {
+  const isEditMode = !!existingGoal;
+  
+  const [goalType, setGoalType] = useState<GoalType>(existingGoal?.type || GoalType.HEALTH);
+  const [currentWeight, setCurrentWeight] = useState(existingGoal?.currentWeight?.toString() || '');
+  const [targetWeight, setTargetWeight] = useState(existingGoal?.targetWeight?.toString() || '');
+  const [startDate, setStartDate] = useState(
+    existingGoal?.startDate 
+      ? new Date(existingGoal.startDate).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0]
+  );
+  const [targetDate, setTargetDate] = useState(
+    existingGoal?.targetDate 
+      ? new Date(existingGoal.targetDate).toISOString().split('T')[0]
+      : ''
+  );
+  const [dailyCalories, setDailyCalories] = useState(existingGoal?.dailyCalorieGoal?.toString() || '2000');
+  const [protein, setProtein] = useState(existingGoal?.macroGoals?.protein?.toString() || '50');
+  const [fat, setFat] = useState(existingGoal?.macroGoals?.fat?.toString() || '65');
+  const [carbs, setCarbs] = useState(existingGoal?.macroGoals?.carbs?.toString() || '275');
+  const [fiber, setFiber] = useState(existingGoal?.macroGoals?.fiber?.toString() || '25');
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recommendation, setRecommendation] = useState<string>('');
+  const [hasUserProfile, setHasUserProfile] = useState(false);
+
+  // 加载用户信息并自动填充
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (user?.profile) {
+      setHasUserProfile(true);
+      
+      // 自动填充当前体重
+      if (user.profile.currentWeight) {
+        setCurrentWeight(user.profile.currentWeight.toString());
+      }
+
+      // 计算推荐值
+      const recommended = calculateRecommendedGoals(user, goalType);
+      if (recommended) {
+        setDailyCalories(recommended.dailyCalories.toString());
+        setProtein(recommended.macros.protein.toString());
+        setFat(recommended.macros.fat.toString());
+        setCarbs(recommended.macros.carbs.toString());
+        setFiber(recommended.macros.fiber.toString());
+        
+        setRecommendation(
+          `根据您的个人信息，推荐每日摄入 ${recommended.dailyCalories} 千卡。` +
+          `（基础代谢：${recommended.bmr} kcal，总消耗：${recommended.tdee} kcal）`
+        );
+      }
+    }
+  }, [goalType]);
+
+  // 当目标类型改变时，重新计算推荐值
+  const handleGoalTypeChange = (newGoalType: GoalType) => {
+    setGoalType(newGoalType);
+    
+    const user = getCurrentUser();
+    if (user?.profile) {
+      const recommended = calculateRecommendedGoals(user, newGoalType);
+      if (recommended) {
+        setDailyCalories(recommended.dailyCalories.toString());
+        setProtein(recommended.macros.protein.toString());
+        setFat(recommended.macros.fat.toString());
+        setCarbs(recommended.macros.carbs.toString());
+        setFiber(recommended.macros.fiber.toString());
+        
+        setRecommendation(getGoalTypeRecommendation(newGoalType));
+      }
+    }
+  };
 
   const goalTypes = [
     {
@@ -78,7 +143,13 @@ const GoalSetup: React.FC<GoalSetupProps> = ({ onGoalCreated, onCancel }) => {
         },
       };
 
-      createGoal(goalData);
+      if (isEditMode && existingGoal) {
+        // 编辑模式：更新现有目标
+        updateGoal(existingGoal.id, goalData);
+      } else {
+        // 创建模式：创建新目标
+        createGoal(goalData);
+      }
 
       if (onGoalCreated) {
         onGoalCreated();
@@ -87,7 +158,7 @@ const GoalSetup: React.FC<GoalSetupProps> = ({ onGoalCreated, onCancel }) => {
       if (error instanceof Error) {
         setErrors([error.message]);
       } else {
-        setErrors(['创建目标失败，请重试']);
+        setErrors([isEditMode ? '更新目标失败，请重试' : '创建目标失败，请重试']);
       }
     } finally {
       setIsSubmitting(false);
@@ -97,7 +168,7 @@ const GoalSetup: React.FC<GoalSetupProps> = ({ onGoalCreated, onCancel }) => {
   return (
     <div className="goal-setup">
       <div className="setup-header">
-        <h2>设定健康目标</h2>
+        <h2>{isEditMode ? '编辑健康目标' : '设定健康目标'}</h2>
         <p>选择目标类型并设置您的健康计划</p>
       </div>
 
@@ -122,7 +193,7 @@ const GoalSetup: React.FC<GoalSetupProps> = ({ onGoalCreated, onCancel }) => {
                 key={type.value}
                 type="button"
                 className={`goal-type-card ${goalType === type.value ? 'selected' : ''}`}
-                onClick={() => setGoalType(type.value)}
+                onClick={() => handleGoalTypeChange(type.value)}
               >
                 <span className="type-icon">{type.icon}</span>
                 <span className="type-label">{type.label}</span>
@@ -193,6 +264,33 @@ const GoalSetup: React.FC<GoalSetupProps> = ({ onGoalCreated, onCancel }) => {
             </div>
           </div>
         </div>
+
+        {/* 智能推荐提示 */}
+        {hasUserProfile && recommendation && (
+          <div className="recommendation-box">
+            <div className="recommendation-icon">💡</div>
+            <div className="recommendation-content">
+              <div className="recommendation-title">智能推荐</div>
+              <div className="recommendation-text">{recommendation}</div>
+              <div className="recommendation-note">
+                以下数值已根据您的个人信息自动填充，您可以根据需要调整
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!hasUserProfile && (
+          <div className="warning-box">
+            <div className="warning-icon">⚠️</div>
+            <div className="warning-content">
+              <div className="warning-title">提示</div>
+              <div className="warning-text">
+                您还未完善个人信息。建议先前往"个人信息"页面填写身高、体重、年龄等信息，
+                系统将为您自动计算推荐的营养目标。
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 每日卡路里目标 */}
         <div className="form-section">
@@ -286,7 +384,10 @@ const GoalSetup: React.FC<GoalSetupProps> = ({ onGoalCreated, onCancel }) => {
             className="btn btn-primary"
             disabled={isSubmitting}
           >
-            {isSubmitting ? '创建中...' : '✓ 创建目标'}
+            {isSubmitting 
+              ? (isEditMode ? '保存中...' : '创建中...') 
+              : (isEditMode ? '✓ 保存目标' : '✓ 创建目标')
+            }
           </button>
           {onCancel && (
             <button

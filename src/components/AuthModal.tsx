@@ -41,6 +41,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSuccess }) => {
         if (response.success && response.user) {
           onSuccess(response.user);
           onClose();
+          // 注册成功后，提示用户完善信息
+          setTimeout(() => {
+            alert('注册成功！请前往"我的"页面完善个人信息，以获得更精准的健康建议。');
+          }, 300);
         } else {
           setError(response.error || '注册失败');
         }

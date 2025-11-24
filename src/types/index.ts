@@ -388,6 +388,7 @@ export interface User {
     height?: number;
     age?: number;
     gender?: 'male' | 'female';
+    activityLevel?: 'sedentary' | 'light' | 'moderate' | 'heavy'; // 活动水平
   };
 }
 

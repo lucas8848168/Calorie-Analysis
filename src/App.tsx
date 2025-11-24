@@ -14,9 +14,9 @@ import './App.css';
 // Lazy load heavy components for better initial load performance
 const HistoryList = lazy(() => import('./components/HistoryList'));
 const DataAnalysis = lazy(() => import('./pages/DataAnalysis'));
-const GoalManagement = lazy(() => import('./pages/GoalManagement'));
+const MyProfile = lazy(() => import('./pages/MyProfile'));
 
-type AppPage = 'analysis' | 'result' | 'error' | 'history' | 'data' | 'goals';
+type AppPage = 'analysis' | 'result' | 'error' | 'history' | 'data' | 'profile';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<AppPage>('analysis');
@@ -148,10 +148,10 @@ function App() {
           </Suspense>
         );
 
-      case 'goals':
+      case 'profile':
         return (
           <Suspense fallback={<SkeletonLoader type="card" count={2} />}>
-            <GoalManagement />
+            <MyProfile user={currentUser} onUserUpdate={setCurrentUser} />
           </Suspense>
         );
 
@@ -175,24 +175,8 @@ function App() {
       <OfflineIndicator />
       
       <header className="app-header">
-        <div className="header-content">
-          <div className="header-title">
-            <h1>🍽️ 食物卡路里分析器</h1>
-            <p className="subtitle">上传食物图片，AI 智能识别营养成分</p>
-          </div>
-          <div className="header-actions">
-            {currentUser ? (
-              <UserProfile user={currentUser} onLogout={handleLogout} />
-            ) : (
-              <button
-                className="login-btn"
-                onClick={() => setShowAuthModal(true)}
-              >
-                登录 / 注册
-              </button>
-            )}
-          </div>
-        </div>
+        <h1>🍽️ 食物卡路里分析器</h1>
+        <p className="subtitle">上传食物图片，AI 智能识别营养成分</p>
       </header>
 
       <main className="app-main">{renderPageContent()}</main>
@@ -228,11 +212,11 @@ function App() {
         </button>
 
         <button
-          className={`nav-item ${currentPage === 'goals' ? 'active' : ''}`}
-          onClick={() => handleNavigate('goals')}
+          className={`nav-item ${currentPage === 'profile' ? 'active' : ''}`}
+          onClick={() => handleNavigate('profile')}
         >
-          <span className="nav-icon">🎯</span>
-          <span className="nav-label">目标</span>
+          <span className="nav-icon">👤</span>
+          <span className="nav-label">我的</span>
         </button>
       </nav>
 

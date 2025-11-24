@@ -1,168 +1,212 @@
 # 🍽️ 食物卡路里分析器
 
-基于 AI 的智能食物识别和营养分析系统。上传食物图片，自动识别食物类型并计算卡路里和营养成分。
+一个基于 AI 的智能食物识别和营养分析系统，帮助你轻松追踪饮食和管理健康目标。
 
-[![在线演示](https://img.shields.io/badge/演示-在线体验-blue)](https://lucas8848168.github.io/ka/)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+[![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6.svg)](https://www.typescriptlang.org/)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020.svg)](https://workers.cloudflare.com/)
 
-## ✨ 功能特性
+## ✨ 核心功能
 
-- 📸 **智能图片识别** - 上传食物图片，AI 自动识别食物类型
-- 🔢 **卡路里计算** - 自动计算食物的卡路里含量
-- 📊 **营养成分分析** - 显示蛋白质、脂肪、碳水化合物、膳食纤维等详细信息
-- 🍽️ **餐次管理** - 按早餐、午餐、晚餐、加餐分类管理饮食记录
-- 📈 **数据可视化** - 卡路里趋势图、营养雷达图、餐次分布图
-- 🎯 **目标管理** - 设置健康目标，追踪进度，连续达标徽章
-- ⭐ **收藏功能** - 收藏常吃食物，快速添加到餐次
-- 📋 **模板管理** - 保存常用餐次组合，一键应用
-- 💾 **本地存储** - 所有数据保存在浏览器本地，保护隐私
-- 📱 **响应式设计** - 完美支持桌面和移动设备
+### 🤖 智能识别
+- 📸 拍照即可识别食物并计算卡路里
+- 🎯 支持多种食物同时识别
+- 📊 自动估算食物重量和分量
+- 💡 提供详细的营养成分分析
 
-## 🛠️ 技术栈
+### 📈 健康管理
+- 🎯 个性化健康目标设置（减重/增肌/维持）
+- 📊 智能营养目标计算（基于 BMR/TDEE）
+- 📈 每日进度追踪和可视化
+- 🏆 连续达标天数统计
+
+### 💡 AI 建议
+- 🤖 基于历史数据的个性化饮食建议
+- ⚖️ 营养均衡度分析
+- 🥗 健康食物推荐
+- ⚠️ 营养摄入预警
+
+### 📱 现代体验
+- 📱 PWA 支持，可安装到手机
+- 🔄 离线功能，无网络也能使用
+- 🎨 响应式设计，适配各种设备
+- ⚡ 快速加载，流畅体验
+
+## 🚀 技术栈
 
 ### 前端
 - **框架**: React 19 + TypeScript
 - **构建工具**: Vite 7
-- **图表库**: Recharts
-- **样式**: CSS3 响应式布局
-- **状态管理**: 自定义 Hooks
+- **样式**: 原生 CSS3（响应式设计）
+- **图表**: Recharts
+- **PWA**: Service Worker + Manifest
+- **存储**: IndexedDB + LocalStorage
 
 ### 后端
-- **平台**: Cloudflare Workers (Serverless)
-- **AI 能力**: 视觉识别 API
-- **部署**: Cloudflare Pages + Workers
+- **平台**: Cloudflare Workers（Serverless）
+- **AI**: 豆包 1.6 Vision API
+- **部署**: Wrangler CLI
 
-## 🚀 快速开始
+## 📦 快速开始
 
-### 前置要求
-
+### 前提条件
 - Node.js 18+
 - npm 或 yarn
 
-### 1. 克隆项目
+### 安装和运行
 
-\`\`\`bash
-git clone https://github.com/lucas8848168/ka.git
-cd ka
-\`\`\`
+```bash
+# 克隆仓库
+git clone https://github.com/your-username/food-calorie-analyzer.git
+cd food-calorie-analyzer
 
-### 2. 安装依赖
-
-\`\`\`bash
+# 安装依赖
 npm install
-\`\`\`
 
-### 3. 配置环境变量
-
-复制 \`.env.example\` 为 \`.env\`:
-
-\`\`\`bash
-cp .env.example .env
-\`\`\`
-
-编辑 \`.env\` 文件，配置 API 端点：
-
-\`\`\`env
-VITE_API_ENDPOINT=http://localhost:8787
-\`\`\`
-
-### 4. 启动开发服务器
-
-\`\`\`bash
+# 启动开发服务器
 npm run dev
-\`\`\`
 
-访问 http://localhost:5173 即可使用应用。
+# 访问 http://localhost:5173
+```
 
-### 5. 构建生产版本
+### 构建生产版本
 
-\`\`\`bash
+```bash
 npm run build
-\`\`\`
+```
 
-构建产物在 \`dist/\` 目录。
+## 🎯 使用指南
 
-## 📖 使用说明
+### 1. 注册账号
+首次使用需要创建账号，所有数据存储在本地浏览器中，保护隐私。
 
-### 基础功能
+### 2. 设置个人信息
+填写身高、体重、年龄等信息，系统会自动计算基础代谢率（BMR）和每日总能量消耗（TDEE）。
 
-1. **上传图片** - 点击上传区域或拖拽图片（支持 JPEG、PNG、WebP，最大 10MB）
-2. **查看分析结果** - AI 识别食物并显示营养信息（通常需要 30-60 秒）
-3. **保存到餐次** - 选择餐次类型保存记录
+### 3. 创建健康目标
+- 选择目标类型：减重、增肌、维持体重或健康饮食
+- 设置目标体重和时间
+- 系统自动计算每日卡路里和营养目标
 
-### 餐次管理
+### 4. 识别食物
+- 点击上传按钮或拍照
+- AI 自动识别食物并计算营养
+- 查看详细的营养分析和健康建议
+- 保存到历史记录
 
-4. **查看历史记录** - 按日期和餐次类型查看饮食记录
-5. **快速添加** - 使用常吃食物网格或收藏快速添加
-6. **模板管理** - 保存常用餐次组合，一键应用
+### 5. 追踪进度
+在数据分析页面查看：
+- 每日营养摄入趋势图
+- 目标完成进度
+- 营养素分布饼图
+- 连续达标天数
 
-### 数据分析
+## 🌟 特色亮点
 
-7. **查看趋势** - 卡路里趋势图、营养雷达图、餐次分布图
-8. **数据摘要** - 平均每日卡路里、总餐次、营养达成情况
+### 智能识别
+- 支持中式和西式常见菜肴
+- 自动估算食物重量
+- 识别准确率高
+- 30-60 秒快速响应
+
+### 营养分析
+- 精确的卡路里计算
+- 详细的营养素分解（蛋白质、脂肪、碳水、纤维）
+- 基于实际分量的数据
+- 专业的健康建议
 
 ### 目标管理
+- 科学的营养目标计算
+- 灵活的目标调整
+- 实时进度追踪
+- 达标率统计
 
-9. **设置目标** - 选择目标类型（减重/增肌/维持/健康），设置目标体重和营养目标
-10. **追踪进度** - 查看进度百分比、连续达标徽章、每日达成情况
-
-## 🏗️ 项目架构
-
-\`\`\`
-food-calorie-analyzer/
-├── src/                      # 前端源代码
-│   ├── components/          # React 组件
-│   │   ├── Charts/          # 图表组件
-│   │   ├── Goal/            # 目标管理
-│   │   ├── Meal/            # 餐次管理
-│   │   └── ...
-│   ├── pages/               # 页面组件
-│   ├── hooks/               # 自定义 Hooks
-│   ├── services/            # 业务逻辑层
-│   ├── types/               # TypeScript 类型
-│   ├── utils/               # 工具函数
-│   └── App.tsx              # 主应用
-├── workers/                  # 后端 API（未开源）
-├── index.html
-├── vite.config.ts
-└── package.json
-\`\`\`
-
-### 核心模块
-
-- **ImageUploader** - 图片上传和压缩
-- **AnalysisDisplay** - 分析结果展示
-- **MealManager** - 餐次管理系统
-- **DataAnalysis** - 数据可视化
-- **GoalManagement** - 目标追踪
-- **StorageOptimizer** - 本地存储优化
-
-## 📊 性能优化
-
-- ✅ 自动图片压缩（优化 API 调用成本）
-- ✅ React.memo 优化组件渲染
-- ✅ useMemo 缓存计算结果
-- ✅ 自动清理 30 天前的旧数据
-- ✅ 智能存储管理（最大 5MB）
+### 数据可视化
+- 每日营养摄入趋势
+- 营养素分布图
+- 餐次分布统计
+- 目标进度图表
 
 ## 🔒 隐私保护
 
-- 所有数据保存在浏览器本地（LocalStorage）
-- 不收集用户个人信息
-- 图片仅用于 AI 分析，不存储在服务器
+- ✅ 所有用户数据存储在本地浏览器
+- ✅ 不上传个人信息到服务器
+- ✅ 仅上传食物图片用于识别
+- ✅ 图片不会被保存
+- ✅ 符合 GDPR 和隐私法规
 
-## 🤝 贡献
+## 📱 PWA 安装
+
+### iOS
+1. 在 Safari 中打开应用
+2. 点击分享按钮
+3. 选择"添加到主屏幕"
+
+### Android
+1. 在 Chrome 中打开应用
+2. 点击菜单
+3. 选择"安装应用"
+
+## 🤝 贡献指南
 
 欢迎提交 Issue 和 Pull Request！
 
+### 开发流程
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
+
+### 代码规范
+- 使用 TypeScript 严格模式
+- 遵循 ESLint 配置
+- 使用 Prettier 格式化代码
+- 编写清晰的注释
+
 ## 📄 许可证
 
-ISC License
+本项目采用 ISC 许可证。详见 [LICENSE](LICENSE) 文件。
+
+## 👨‍💻 作者
+
+**Lucas**
+
+- GitHub: [@lucas8848168](https://github.com/lucas8848168)
+- Email: lucas8848168@gmail.com
+
+## 🙏 致谢
+
+- [React](https://react.dev/) - UI 框架
+- [Vite](https://vitejs.dev/) - 构建工具
+- [Recharts](https://recharts.org/) - 图表库
+- [Cloudflare Workers](https://workers.cloudflare.com/) - Serverless 平台
+- [豆包 AI](https://www.volcengine.com/product/doubao) - AI 识别服务
+
+## 📞 联系方式
+
+### 商务合作
+如有商务合作、技术咨询或其他问题，欢迎联系：
+
+- **邮箱**: lucas8848168@gmail.com
+- **GitHub Issues**: [提交问题](https://github.com/lucas8848168/food-calorie-analyzer/issues)
+
+### 技术支持
+- 查看 [Issues](https://github.com/lucas8848168/food-calorie-analyzer/issues) 寻找解决方案
+- 提交新的 Issue 报告问题
+- 参与 Discussions 讨论
 
 ## ⚠️ 免责声明
 
-本应用提供的营养数据仅供参考，基于 AI 模型估算，实际值可能有所不同。如需精确的营养信息，请咨询专业营养师。
+本应用提供的营养数据和健康建议仅供参考，不能替代专业的营养咨询或医疗建议。如有特殊饮食需求或健康问题，请咨询专业营养师或医生。
+
+## 🌟 Star History
+
+如果这个项目对你有帮助，欢迎给个 Star ⭐️
 
 ---
 
-**在线演示**: https://lucas8848168.github.io/ka/  
-**最后更新**: 2025-11-20
+**© 2025 Lucas. All rights reserved.**
+
+Made with ❤️ by Lucas

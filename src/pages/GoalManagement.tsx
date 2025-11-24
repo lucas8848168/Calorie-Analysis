@@ -52,8 +52,7 @@ const GoalManagement: React.FC = () => {
 
   // 处理编辑目标（使用useCallback优化）
   const handleEditGoal = useCallback(() => {
-    // TODO: 实现编辑功能
-    alert('编辑功能即将推出');
+    setViewMode('create'); // 切换到创建/编辑视图
   }, []);
 
   // 计算历史目标（使用useMemo优化）
@@ -123,10 +122,14 @@ const GoalManagement: React.FC = () => {
     );
   };
 
-  // 渲染创建视图
+  // 渲染创建/编辑视图
   const renderCreate = () => (
     <div className="create-content">
-      <GoalSetup onGoalCreated={handleGoalCreated} onCancel={() => setViewMode('overview')} />
+      <GoalSetup 
+        existingGoal={activeGoal || undefined}
+        onGoalCreated={handleGoalCreated} 
+        onCancel={() => setViewMode('overview')} 
+      />
     </div>
   );
 

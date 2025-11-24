@@ -74,5 +74,5 @@ export function preloadAllComponents(): void {
   // This can be called after initial page load to preload all lazy components
   preloadOnIdle(() => import('../components/HistoryList'), 'HistoryList');
   preloadOnIdle(() => import('../pages/DataAnalysis'), 'DataAnalysis');
-  preloadOnIdle(() => import('../pages/GoalManagement'), 'GoalManagement');
+  preloadOnIdle(() => import('../pages/MyProfile'), 'MyProfile');
 }
