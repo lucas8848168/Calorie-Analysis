@@ -1,101 +1,49 @@
-# ============================================
-# 推荐的 .gitignore 配置（安全加强版）
-# ============================================
-
-# -------------------- 依赖 --------------------
+# Dependencies
 node_modules/
 workers/node_modules/
 
-# -------------------- 构建产物 --------------------
+# Build output
 dist/
 .output/
 workers/dist/
 
-# -------------------- 环境变量（敏感信息）--------------------
-# 所有环境变量文件都不上传
+# Environment variables (sensitive)
 .env
-.env.*
-!.env.example
+.env.local
+.env.*.local
 workers/.dev.vars
-workers/.env*
 
-# -------------------- IDE --------------------
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# -------------------- 操作系统 --------------------
+# OS
 .DS_Store
 Thumbs.db
 
-# -------------------- 日志 --------------------
+# Logs
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# -------------------- Cloudflare --------------------
+# Cloudflare
 .wrangler/
-wrangler.toml.backup
 
-# -------------------- 测试 --------------------
+# Testing
 coverage/
 .nyc_output/
 
-# -------------------- 临时文件 --------------------
+# Temporary files
 *.tmp
 .cache/
 
-# -------------------- 核心业务逻辑（可选）--------------------
-# 如果不想开源后端核心代码，取消下面的注释
-# workers/src/doubaoClient.ts
-# workers/src/config.ts
-# workers/src/worker.ts
-
-# -------------------- 敏感文档 --------------------
-# 包含部署信息、API 密钥配置的文档
-DEPLOYMENT_*.md
-GITHUB_*_GUIDE.md
-GITHUB_*_COMPLETE.md
-GITHUB_*_SUCCESS.md
-快速部署指引.md
-CLOUDFLARE_FREE_TIER_ANALYSIS.md
-SECURITY_*.md
-
-# -------------------- 核心文档和技术文档 --------------------
-# 所有内部文档、规范、技术文档都不上传
-# 只保留 README.md（专门为 GitHub 编写的简介）
-
-# 保护所有 .md 文件，除了 README.md
-*.md
-!README.md
-!.github/**/*.md
-
-# 规范文档（.kiro 目录下的所有规范）
-.kiro/specs/
-.kiro/steering/
-
-# 其他技术文档
-docs/
-
-# -------------------- 私有目录 --------------------
-# 存放所有不想公开的文件
+# Private files
 .private/
-demo-portfolio/
-demo-frontend-only/
+
+# Demo materials (not needed in DEMO repo)
 ppt-materials/
-
-# -------------------- 后端核心代码（保护商业逻辑）--------------------
-# Workers 核心业务逻辑不上传到 GitHub
-workers/src/doubaoClient.ts
-workers/src/config.ts
-workers/src/mockData.ts
-
-# -------------------- 部署脚本 --------------------
-# 包含敏感信息的部署脚本
-deploy.bat
-deploy.sh
-scripts/

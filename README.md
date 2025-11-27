@@ -1,11 +1,12 @@
-# 🍽️ 食物卡路里分析器
+# 🍽️ 食物卡路里分析器 DEMO
 
 一个基于 AI 的智能食物识别和营养分析系统，帮助你轻松追踪饮食和管理健康目标。
+
+**🎯 在线演示**: https://lucas8848168.github.io/Calorie-AnalysisDEMO/
 
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 [![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6.svg)](https://www.typescriptlang.org/)
-[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020.svg)](https://workers.cloudflare.com/)
 
 ## ✨ 核心功能
 
@@ -44,9 +45,9 @@
 - **存储**: IndexedDB + LocalStorage
 
 ### 后端
-- **平台**: Cloudflare Workers（Serverless）
+- **平台**: Cloudflare Pages Functions（Serverless）
 - **AI**: 豆包 1.6 Vision API
-- **部署**: Wrangler CLI
+- **部署**: GitHub Pages + Cloudflare Pages
 
 ## 📦 快速开始
 
@@ -54,12 +55,12 @@
 - Node.js 18+
 - npm 或 yarn
 
-### 安装和运行
+### 本地开发
 
 ```bash
 # 克隆仓库
-git clone https://github.com/your-username/food-calorie-analyzer.git
-cd food-calorie-analyzer
+git clone https://github.com/lucas8848168/Calorie-AnalysisDEMO.git
+cd Calorie-AnalysisDEMO
 
 # 安装依赖
 npm install
@@ -75,6 +76,32 @@ npm run dev
 ```bash
 npm run build
 ```
+
+构建产物在 `dist/` 目录，包含前端和 Cloudflare Pages Functions。
+
+## 🌐 部署
+
+### GitHub Pages 部署（前端）
+
+项目已配置 GitHub Actions 自动部署：
+
+1. 推送代码到 `main` 分支
+2. GitHub Actions 自动构建并部署到 GitHub Pages
+3. 访问 https://lucas8848168.github.io/Calorie-AnalysisDEMO/
+
+### Cloudflare Pages 部署（前后端）
+
+如需完整功能（包括 AI 识别），需要部署到 Cloudflare Pages：
+
+1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. 创建 Pages 项目，连接此 GitHub 仓库
+3. 配置构建设置：
+   - 构建命令: `npm run build`
+   - 输出目录: `dist`
+4. 添加环境变量：
+   - `DOUBAO_API_KEY`: 豆包 API 密钥
+   - `DOUBAO_API_ENDPOINT`: `https://ark.cn-beijing.volces.com/api/v3`
+5. 部署完成后访问分配的域名
 
 ## 🎯 使用指南
 
@@ -101,32 +128,6 @@ npm run build
 - 目标完成进度
 - 营养素分布饼图
 - 连续达标天数
-
-## 🌟 特色亮点
-
-### 智能识别
-- 支持中式和西式常见菜肴
-- 自动估算食物重量
-- 识别准确率高
-- 30-60 秒快速响应
-
-### 营养分析
-- 精确的卡路里计算
-- 详细的营养素分解（蛋白质、脂肪、碳水、纤维）
-- 基于实际分量的数据
-- 专业的健康建议
-
-### 目标管理
-- 科学的营养目标计算
-- 灵活的目标调整
-- 实时进度追踪
-- 达标率统计
-
-### 数据可视化
-- 每日营养摄入趋势
-- 营养素分布图
-- 餐次分布统计
-- 目标进度图表
 
 ## 🔒 隐私保护
 
@@ -181,29 +182,12 @@ npm run build
 - [React](https://react.dev/) - UI 框架
 - [Vite](https://vitejs.dev/) - 构建工具
 - [Recharts](https://recharts.org/) - 图表库
-- [Cloudflare Workers](https://workers.cloudflare.com/) - Serverless 平台
+- [Cloudflare Pages](https://pages.cloudflare.com/) - 部署平台
 - [豆包 AI](https://www.volcengine.com/product/doubao) - AI 识别服务
-
-## 📞 联系方式
-
-### 商务合作
-如有商务合作、技术咨询或其他问题，欢迎联系：
-
-- **邮箱**: lucas8848168@gmail.com
-- **GitHub Issues**: [提交问题](https://github.com/lucas8848168/food-calorie-analyzer/issues)
-
-### 技术支持
-- 查看 [Issues](https://github.com/lucas8848168/food-calorie-analyzer/issues) 寻找解决方案
-- 提交新的 Issue 报告问题
-- 参与 Discussions 讨论
 
 ## ⚠️ 免责声明
 
 本应用提供的营养数据和健康建议仅供参考，不能替代专业的营养咨询或医疗建议。如有特殊饮食需求或健康问题，请咨询专业营养师或医生。
-
-## 🌟 Star History
-
-如果这个项目对你有帮助，欢迎给个 Star ⭐️
 
 ---
 
